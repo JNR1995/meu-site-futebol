@@ -2,6 +2,7 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 from datetime import datetime
+import hashlib
 
 st.set_page_config(page_title="Futebol Stats Jnr", layout="wide")
 
@@ -109,6 +110,10 @@ st.markdown("""
     </style>
 
     """, unsafe_allow_html=True)
+
+def gerar_hash(senha):
+    """Transforma a senha em um código seguro (Hash)."""
+    return hashlib.sha256(str.encode(senha)).hexdigest()
 
 def salvar_favorito(fix_id):
     conn = sqlite3.connect('FutebolStatsJnr.db')
