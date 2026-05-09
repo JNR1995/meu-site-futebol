@@ -1,0 +1,65 @@
+name: Atualizar Jogos Diario
+
+
+
+on:
+
+  schedule:
+
+    - cron: '0 3 * * *' # Roda todo dia às 05:00 da manhã (Horário de Brasília)
+
+  workflow_dispatch: # Permite que você rode manualmente se quiser
+
+
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout do código
+
+        uses: actions/checkout@v3
+
+
+
+      - name: Configurar Python
+
+        uses: actions/setup-python@v4
+
+        with:
+
+          python-version: '3.11'
+
+
+
+      - name: Instalar dependências
+
+        run: |
+
+          pip install pandas requests pytz
+
+
+
+      - name: Rodar Script de Atualização
+
+        run: python alimentar_banco_mestre_V6.py # SEU ARQUIVO
+
+
+
+      - name: Salvar mudanças no Banco de Dados
+
+        run: |
+
+          git config --global user.name 'GitHub Action'
+
+          git config --global user.email 'action@github.com'
+
+          git add FutebolStatsJnr.db
+
+          git commit -m "Auto-update: Jogos do dia" || exit 0
+
+          git push
