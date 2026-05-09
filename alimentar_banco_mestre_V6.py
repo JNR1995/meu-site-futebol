@@ -409,17 +409,5 @@ def rodar_via_csv():
 import sys
 
 if __name__ == "__main__":
-    # Se você chamar o script com "auto", ele ignora o menu e roda a opção 2
-    if len(sys.argv) > 1 and sys.argv[1] == 'auto':
-        rodar_automatico_dia()
-    else:
-        # Menu manual para quando você clicar no arquivo
-        print("--- MENU ---")
-        print("1. CSV (Cadastro)")
-        print("2. Auto (Dia)")
-        opcao = input("Opção: ")
-        
-        if opcao == '1':
-            rodar_via_csv()
-        elif opcao == '2':
-            rodar_automatico_dia()
+    # Quando rodar no GitHub, ele vai direto para a atualização automática
+    rodar_automatico_dia()
