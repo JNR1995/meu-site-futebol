@@ -8,6 +8,13 @@ from streamlit_gsheets import GSheetsConnection
 # --- CONEXÃO COM GOOGLE SHEETS E SQLITE ---
 conn = st.connection("gsheets", type=GSheetsConnection)
 
+try:
+    df = conn.read()
+    st.success("Conectado!")
+    st.write(df)
+except Exception as e:
+    st.error(e)
+
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Futebol Stats Jnr", layout="wide")
 
