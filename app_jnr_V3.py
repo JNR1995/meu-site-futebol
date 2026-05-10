@@ -122,7 +122,7 @@ if st.session_state.pagina == 'logon':
         p = st.text_input("Senha", type="password")
         if st.button("Entrar"):
             try:
-                df = conn_gsheets.read(worksheet="usuarios", ttl=0) # ttl=0 força a ler dados novos e não do cache
+                df = conn_gsheets.read()
             except Exception as e:
                 st.error("Erro ao conectar com a planilha. Verifique o link nos Secrets.")
                 st.stop()
@@ -156,7 +156,7 @@ elif st.session_state.pagina == 'cadastro':
         ps = st.text_input("Senha", type="password")
         if st.form_submit_button("Finalizar"):
             try:
-                df = conn_gsheets.read(worksheet="usuarios", ttl=0) # ttl=0 força a ler dados novos e não do cache
+                df = conn_gsheets.read()
             except Exception as e:
                 st.error("Erro ao conectar com a planilha. Verifique o link nos Secrets.")
                 st.stop()
