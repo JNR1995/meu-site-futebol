@@ -188,7 +188,7 @@ elif st.session_state.pagina == 'cadastro':
             if username_existe:
                 st.error("Username já existe.")
             else:
-                # 2. Criamos o dicionário com os dados exatos para o Script do Google
+                # 2. Prepara os dados para o Google
                 dados_para_envio = {
                     "Nome": n, 
                     "CPF": c, 
@@ -200,9 +200,9 @@ elif st.session_state.pagina == 'cadastro':
                 
                 try:
                     # COLE A URL QUE VOCÊ COPIOU DO GOOGLE (Apps Script) AQUI
-                    url_script = "https://script.google.com/macros/s/AKfycbwWH_TCzS9OI8la35nOPsb9aTGQLnEgKdFZdM6YKqdGU3XvcaOZQq3fn0x3H8IxFfY7GA/exec"
+                    url_script = "https://script.google.com/macros/s/AKfycbxADULGppQvqhIYZ6SB9f4XvNd2LSKdm1R5iYbfpKl6uzZayg5ik1F09DsdAziJu6ZkOw/exec"
                     
-                    # 3. Enviamos direto para o Script do Google
+                    # 3. Envia os dados
                     response = requests.post(url_script, json=dados_para_envio)
                     
                     if response.status_code == 200:
@@ -210,9 +210,10 @@ elif st.session_state.pagina == 'cadastro':
                         st.session_state.pagina = 'logon'
                         st.rerun()
                     else:
-                        st.error(f"O Google recusou o envio. Status: {response.status_code}")
+                        # Se der 401 de novo, o erro aparecerá aqui
+                        st.error(f"Erro de autorização no Google (Status {response.status_code}). Verifique se o Script está para 'Qualquer pessoa'.")
                 except Exception as erro:
-                    st.error(f"Erro de conexão com o Script: {erro}")
+                    st.error(f"Erro na conexão: {erro}")
                 
                 # Transformamos em DataFrame para o concat
                 novo_df = pd.DataFrame([novo_usuario])
