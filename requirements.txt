@@ -1,5 +1,5 @@
 streamlit
 pandas
-requests
-pytz
-st-gsheets-connection
+gspread
+oauth2client
+streamlit-gsheets
