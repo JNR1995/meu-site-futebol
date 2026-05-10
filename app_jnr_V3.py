@@ -121,7 +121,12 @@ if st.session_state.pagina == 'logon':
         u = st.text_input("Username")
         p = st.text_input("Senha", type="password")
         if st.button("Entrar"):
-            df = conn_gsheets.read(worksheet="usuarios")
+            try:
+                df = conn_gsheets.read(worksheet="usuarios", ttl=0) # ttl=0 força a ler dados novos e não do cache
+            except Exception as e:
+                st.error("Erro ao conectar com a planilha. Verifique o link nos Secrets.")
+                st.stop()
+                
             user_db = df[df['Username'] == u]
             if not user_db.empty:
                 if gerar_hash(p) == user_db.iloc[0]['Senha']:
