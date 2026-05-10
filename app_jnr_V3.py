@@ -155,7 +155,11 @@ elif st.session_state.pagina == 'cadastro':
         un = st.text_input("Username")
         ps = st.text_input("Senha", type="password")
         if st.form_submit_button("Finalizar"):
-            df = conn_gsheets.read(worksheet="usuarios")
+            try:
+                df = conn_gsheets.read(worksheet="usuarios", ttl=0) # ttl=0 força a ler dados novos e não do cache
+            except Exception as e:
+                st.error("Erro ao conectar com a planilha. Verifique o link nos Secrets.")
+                st.stop()
             if un in df['Username'].values: st.error("Username já existe.")
             else:
                 new_id = int(df['id_usuario'].max()) + 1 if not df.empty else 1
