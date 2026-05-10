@@ -178,48 +178,50 @@ elif st.session_state.pagina == 'cadastro':
         if st.form_submit_button("Finalizar"):
             df = ler_planilha()
             
-            if not df.empty and 'Username' in df.columns:
-                if un in df['Username'].astype(str).values: 
-                    st.error("Username já existe.")
-                else:
-                    # Ajuste 4: Cálculo de ID ignorando valores nulos (NaN)
-                    try:
-                        # 1. Tenta pegar a coluna, se ela não existir ou estiver vazia, gera erro e pula pro 'except'
-                        if df.empty or 'id_usuario' not in df.columns:
-                            new_id = 1
-                        else:
-                            # 2. Limpa valores nulos e tenta converter o que sobrar para número
-                            coluna_id = pd.to_numeric(df['id_usuario'], errors='coerce').dropna()
-                            
-                            if coluna_id.empty:
-                                new_id = 1
-                            else:
-                                new_id = int(coluna_id.max()) + 1
-                    except:
-                        # 3. Se qualquer coisa der errado na leitura, ele força o ID 1
-                        new_id = 1
-                    
-                    # Agora ele vai usar o new_id (que será 1 se a planilha estiver como na sua imagem)
-                    novo_usuario = {
-                        "id_usuario": new_id, 
-                        "Nome": n, 
-                        "CPF": c, 
-                        "e-mail": e, 
-                        "Username": un, 
-                        "Senha": gerar_hash(ps), 
-                        "Ativo": True
-                    }
-                    novo = pd.DataFrame([{"id_usuario": new_id, "Nome": n, "CPF": c, "e-mail": e, "Username": un, "Senha": gerar_hash(ps), "Ativo": True}])
-                    updated = pd.concat([df, novo], ignore_index=True)
-                    
-                    # Importante: certifique-se que 'conn_gsheets' está definido globalmente
+            # 1. Definimos as colunas exatamente como queremos na planilha
+            # Nome=A, CPF=B, e-mail=C, Username=D, Senha=E, Ativo=F
+            colunas_esperadas = ["Nome", "CPF", "e-mail", "Username", "Senha", "Ativo"]
+            
+            # 2. Se a planilha vier vazia ou der erro, criamos um DataFrame novo com essas colunas
+            if df is None or df.empty:
+                df = pd.DataFrame(columns=colunas_esperadas)
+            
+            # 3. Verificamos se o Username já existe (agora olhando para a coluna D / 'Username')
+            username_existe = False
+            if 'Username' in df.columns:
+                if un in df['Username'].astype(str).values:
+                    username_existe = True
+
+            if username_existe:
+                st.error("Username já existe.")
+            else:
+                # 4. Criamos o novo registro SEM o campo id_usuario
+                novo_usuario = {
+                    "Nome": n, 
+                    "CPF": c, 
+                    "e-mail": e, 
+                    "Username": un, 
+                    "Senha": gerar_hash(ps), 
+                    "Ativo": True
+                }
+                
+                # Transformamos em DataFrame para o concat
+                novo_df = pd.DataFrame([novo_usuario])
+                
+                # Unimos com os dados existentes
+                updated = pd.concat([df, novo_df], ignore_index=True)
+                
+                # 5. Forçamos o envio garantindo a ordem das colunas na planilha
+                # Isso vai garantir que Nome fique em A, CPF em B, etc.
+                updated = updated[colunas_esperadas]
+                
+                try:
                     conn.update(worksheet="usuarios", data=updated)
-                    
                     st.success("Sucesso! Agora faça o login.")
                     st.session_state.pagina = 'logon'
                     st.rerun()
-            else:
-                st.error("Erro ao ler banco de dados. Verifique a conexão.")
+                except Exception as erro:
+                    st.error(f"Erro ao salvar na planilha: {erro}")
 
     if st.button("Voltar"):
         st.session_state.pagina = 'logon'
