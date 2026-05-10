@@ -3,7 +3,7 @@ import sqlite3
 import pandas as pd
 import hashlib
 from datetime import datetime
-from streamlit_gsheets import GSheetsConnection
+from streamlit_gsheets_connection import GSheetsConnection
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Futebol Stats Jnr", layout="wide")
