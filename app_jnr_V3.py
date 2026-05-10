@@ -196,11 +196,11 @@ elif st.session_state.pagina == 'cadastro':
                     st.error("Username já existe.")
                 else:
                     # Ajuste 4: Cálculo de ID ignorando valores nulos (NaN)
-                    if df.empty or df['id_usuario'].isnull().all():
+                    if df.empty:
                         new_id = 1
                     else:
-                        # Ignora os NaNs/Nones para pegar o maior número real
-                        new_id = int(df['id_usuario'].dropna().max()) + 1 if not df['id_usuario'].dropna().empty else 1
+                        # Pega o maior ID existente e soma 1
+                        new_id = int(df['id_usuario'].max()) + 1
                     
                     novo = pd.DataFrame([{"id_usuario": new_id, "Nome": n, "CPF": c, "e-mail": e, "Username": un, "Senha": gerar_hash(ps), "Ativo": True}])
                     updated = pd.concat([df, novo], ignore_index=True)
