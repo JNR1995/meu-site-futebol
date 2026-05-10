@@ -193,7 +193,7 @@ elif st.session_state.pagina == 'cadastro':
                     updated = pd.concat([df, novo], ignore_index=True)
                     
                     # Importante: certifique-se que 'conn_gsheets' está definido globalmente
-                    conn_gsheets.update(worksheet="usuarios", data=updated)
+                    conn.update(worksheet="usuarios", data=updated)
                     
                     st.success("Sucesso! Agora faça o login.")
                     st.session_state.pagina = 'logon'
