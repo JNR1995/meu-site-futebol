@@ -196,12 +196,32 @@ elif st.session_state.pagina == 'cadastro':
                     st.error("Username já existe.")
                 else:
                     # Ajuste 4: Cálculo de ID ignorando valores nulos (NaN)
-                    if df.empty:
+                    try:
+                        # 1. Tenta pegar a coluna, se ela não existir ou estiver vazia, gera erro e pula pro 'except'
+                        if df.empty or 'id_usuario' not in df.columns:
+                            new_id = 1
+                        else:
+                            # 2. Limpa valores nulos e tenta converter o que sobrar para número
+                            coluna_id = pd.to_numeric(df['id_usuario'], errors='coerce').dropna()
+                            
+                            if coluna_id.empty:
+                                new_id = 1
+                            else:
+                                new_id = int(coluna_id.max()) + 1
+                    except:
+                        # 3. Se qualquer coisa der errado na leitura, ele força o ID 1
                         new_id = 1
-                    else:
-                        # Pega o maior ID existente e soma 1
-                        new_id = int(df['id_usuario'].max()) + 1
                     
+                    # Agora ele vai usar o new_id (que será 1 se a planilha estiver como na sua imagem)
+                    novo_usuario = {
+                        "id_usuario": new_id, 
+                        "Nome": n, 
+                        "CPF": c, 
+                        "e-mail": e, 
+                        "Username": un, 
+                        "Senha": gerar_hash(ps), 
+                        "Ativo": True
+                    }
                     novo = pd.DataFrame([{"id_usuario": new_id, "Nome": n, "CPF": c, "e-mail": e, "Username": un, "Senha": gerar_hash(ps), "Ativo": True}])
                     updated = pd.concat([df, novo], ignore_index=True)
                     
