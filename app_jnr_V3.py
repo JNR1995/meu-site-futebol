@@ -113,21 +113,31 @@ st.markdown("""
 # --- FUNÇÃO PARA LER PLANILHA SEM ERRO HTTP ---
 def ler_planilha():
     try:
-        url_original = st.secrets["connections"]["gsheets"]["spreadsheet"]
-        # Limpa o link de qualquer resquício de gid ou edit
-        url_base = url_original.split("/edit")[0]
-        url_csv = f"{url_base}/export?format=csv&gid=0"
+        # Pega o link do segredo e remove espaços extras
+        url_original = st.secrets["connections"]["gsheets"]["spreadsheet"].strip()
+        
+        # Extrai o ID da planilha para evitar erros com o final do link
+        # Se o link for https://docs.google.com/spreadsheets/d/ABC/edit, pegamos só até o ABC
+        parts = url_original.split('/')
+        if 'd' in parts:
+            sheet_id = parts[parts.index('d') + 1]
+            # Montamos o link de exportação garantindo o formato CSV e a aba usuários
+            url_csv = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet=usuarios"
+        else:
+            # Fallback caso o link não esteja no padrão esperado
+            url_csv = url_original.replace("/edit", "/export?format=csv")
+
         df = pd.read_csv(url_csv)
         
-        # AJUSTE CRÍTICO: Força o nome das colunas para bater com o código
-        # Isso resolve o erro 'Username' mesmo se na planilha estiver minúsculo
+        # Padronização de colunas (Sua planilha usa 'username' minúsculo)
         if not df.empty:
-            df.columns = [c.strip() for c in df.columns] # Remove espaços invisíveis
-            # Mapeia 'username' para 'Username' caso esteja errado na planilha
-            df = df.rename(columns={'username': 'Username', 'email': 'e-mail'})
+            df.columns = [c.strip() for c in df.columns]
+            # Isso evita o erro 'Username' se na planilha estiver minúsculo
+            df = df.rename(columns={'username': 'Username', 'email': 'e-mail', 'senha': 'Senha'})
+            
         return df
     except Exception as e:
-        st.error(f"Erro de conexão: {e}")
+        st.error(f"Erro Crítico de Conexão: {e}")
         return pd.DataFrame()
 
 # --- TELA DE LOGON ---
