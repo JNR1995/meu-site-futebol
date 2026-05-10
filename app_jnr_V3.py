@@ -121,19 +121,24 @@ st.markdown("""
 # --- FUNÇÃO PARA LER PLANILHA SEM ERRO HTTP ---
 def ler_planilha():
     try:
-        # Pega a URL dos Secrets
-        url = st.secrets["connections"]["gsheets"]["url"]
+        # Tenta pegar pela chave 'spreadsheet' que você já usava antes
+        if "connections" in st.secrets and "gsheets" in st.secrets["connections"]:
+            url = st.secrets["connections"]["gsheets"]["spreadsheet"].strip()
+        else:
+            # Se não achar, tenta pegar direto se você colocou sem hierarquia
+            url = st.secrets["spreadsheet"].strip()
+
+        # Lê a planilha forçando o cabeçalho na primeira linha
+        df = pd.read_csv(url)
         
-        # O segredo: forçar o Pandas a ler a partir da primeira linha e tratar como cabeçalho
-        df = pd.read_csv(url, header=0) 
-        
-        # Limpa espaços extras nos nomes das colunas
-        df.columns = df.columns.str.strip()
+        # LIMPEZA CRÍTICA: Remove espaços dos nomes das colunas
+        # Isso resolve o erro de "Coluna Username não encontrada"
+        df.columns = [str(c).strip() for c in df.columns]
         
         return df
     except Exception as e:
         st.error(f"Erro ao ler banco de dados: {e}")
-        return None
+        return pd.DataFrame() # Retorna um DF vazio em vez de None para não quebrar o login
 
 # --- TELA DE LOGON ---
 if st.session_state.pagina == 'logon':
