@@ -200,7 +200,7 @@ elif st.session_state.pagina == 'cadastro':
                 
                 try:
                     # URL do seu Script (Verifique se é exatamente esta)
-                    url_script = "https://script.google.com/macros/s/AKfycbxVxoDgCgciRAVLdbOYfqmIEUBC1F6pcfdRyngwNyQBmKfPEZJicdrmr7-h6boeQU-RKA/exec"
+                    url_script = "https://script.google.com/macros/s/AKfycbxi85QwCTq_sfoA7WppprMxDoOeis_ef3P83hTFAhWmxL5RuRJqBDFrJV6-uut_f4YHww/exec"
                     
                     # O segredo do redirecionamento
                     response = requests.post(url_script, json=dados_para_envio, timeout=10)
