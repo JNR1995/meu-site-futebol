@@ -188,7 +188,7 @@ elif st.session_state.pagina == 'cadastro':
             if username_existe:
                 st.error("Username já existe.")
             else:
-                # 2. Prepara os dados para o Google Apps Script
+                # 2. Dados para o Apps Script (Mantenha e_mail com underline)
                 dados_para_envio = {
                     "Nome": n, 
                     "CPF": c, 
@@ -199,18 +199,19 @@ elif st.session_state.pagina == 'cadastro':
                 }
                 
                 try:
-                    url_script = "https://script.google.com/macros/s/AKfycbxADULGppQvqhIYZ6SB9f4XvNd2LSKdm1R5iYbfpKl6uzZayg5ik1F09DsdAziJu6ZkOw/exec"
+                    # URL do seu Script (Verifique se é exatamente esta)
+                    url_script = "https://script.google.com/macros/s/AKfycbxVxoDgCgciRAVLdbOYfqmIEUBC1F6pcfdRyngwNyQBmKfPEZJicdrmr7-h6boeQU-RKA/exec"
                     
-                    # O segredo para evitar o 401 em redirecionamentos do Google
-                    response = requests.post(url_script, json=dados_para_envio, allow_redirects=True)
+                    # O segredo do redirecionamento
+                    response = requests.post(url_script, json=dados_para_envio, timeout=10)
                     
-                    # O Google às vezes retorna 302 (redirecionamento), verificamos se deu certo
-                    if response.status_code == 200 or "Sucesso" in response.text:
+                    # Se o Google responder 200, ele gravou!
+                    if response.status_code == 200:
                         st.success("Cadastro realizado com sucesso!")
                         st.session_state.pagina = 'logon'
                         st.rerun()
                     else:
-                        st.error(f"Erro no Google (Status {response.status_code}). Tente re-implantar o script como 'Qualquer pessoa'.")
+                        st.error(f"Erro no Google (Status {response.status_code}).")
                 except Exception as erro:
                     st.error(f"Erro na conexão: {erro}")
 
