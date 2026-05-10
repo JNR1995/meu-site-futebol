@@ -179,25 +179,17 @@ elif st.session_state.pagina == 'cadastro':
         if st.form_submit_button("Finalizar"):
             df = ler_planilha()
             
-            # 1. Definimos as colunas exatamente como queremos na planilha
-            # Nome=A, CPF=B, e-mail=C, Username=D, Senha=E, Ativo=F
-            colunas_esperadas = ["Nome", "CPF", "e-mail", "Username", "Senha", "Ativo"]
-            
-            # 2. Se a planilha vier vazia ou der erro, criamos um DataFrame novo com essas colunas
-            if df is None or df.empty:
-                df = pd.DataFrame(columns=colunas_esperadas)
-            
-            # 3. Verificamos se o Username já existe (agora olhando para a coluna D / 'Username')
+            # 1. Verifica se o Username já existe
             username_existe = False
-            if 'Username' in df.columns:
+            if df is not None and not df.empty and 'Username' in df.columns:
                 if un in df['Username'].astype(str).values:
                     username_existe = True
 
             if username_existe:
                 st.error("Username já existe.")
             else:
-                # Criamos os dados exatamente como o robô do Google espera
-                payload = {
+                # 2. Criamos o dicionário com os dados exatos para o Script do Google
+                dados_para_envio = {
                     "Nome": n, 
                     "CPF": c, 
                     "e_mail": e, 
@@ -207,19 +199,20 @@ elif st.session_state.pagina == 'cadastro':
                 }
                 
                 try:
-                    # COLE A URL QUE VOCÊ COPIOU DO GOOGLE AQUI
-                    url_script = "https://script.google.com/macros/s/AKfycbyDaEJeBBu3XAp2NJpnBV5z6XaCzgfqsKVvZPDSPOv3yJYp0MTDH5SqUmrweqGnE_TXkg/exec"
+                    # COLE A URL QUE VOCÊ COPIOU DO GOOGLE (Apps Script) AQUI
+                    url_script = "https://script.google.com/u/0/home/projects/1z-MQwJWpaVvJyfAG9Pc1yMSSLnLp1uBQtuNw4D1hmWWZdQns_umdLlvW/edit"
                     
-                    response = requests.post(url_script, json=payload)
+                    # 3. Enviamos direto para o Script do Google
+                    response = requests.post(url_script, json=dados_para_envio)
                     
                     if response.status_code == 200:
-                        st.success("Cadastro realizado com sucesso na planilha!")
+                        st.success("Cadastro realizado com sucesso!")
                         st.session_state.pagina = 'logon'
                         st.rerun()
                     else:
-                        st.error("Erro ao enviar para a planilha.")
+                        st.error(f"O Google recusou o envio. Status: {response.status_code}")
                 except Exception as erro:
-                    st.error(f"Erro na comunicação: {erro}")
+                    st.error(f"Erro de conexão com o Script: {erro}")
                 
                 # Transformamos em DataFrame para o concat
                 novo_df = pd.DataFrame([novo_usuario])
