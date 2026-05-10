@@ -135,31 +135,39 @@ if st.session_state.pagina == 'logon':
     col_l1, col_log, col_l2 = st.columns([1, 2, 1])
     with col_log:
         st.write("### 🔐 Acesso")
-        u = st.text_input("Username").strip() # .strip() evita espaços acidentais
+        u = st.text_input("Username").strip()
         p = st.text_input("Senha", type="password")
         
         if st.button("Entrar"):
             df = ler_planilha()
             
-            # Ajuste 1: Verificação robusta de colunas
-            if not df.empty and 'Username' in df.columns:
-                # Ajuste 2: Garantir que a comparação ignore espaços ou tipos diferentes
+            # Verificamos se o DataFrame foi lido e se a coluna Username existe
+            if df is not None and not df.empty and 'Username' in df.columns:
+                # Localiza o usuário
                 user_db = df[df['Username'].astype(str) == u]
                 
                 if not user_db.empty:
-                    # Ajuste 3: Converter para string para evitar erro de tipo no hash
-                    if gerar_hash(p) == str(user_db.iloc[0]['Senha']):
-                        if user_db.iloc[0]['Ativo']:
+                    # Comparamos o hash da senha digitada com a salva (na coluna 'Senha')
+                    senha_salva = str(user_db.iloc[0]['Senha'])
+                    
+                    if gerar_hash(p) == senha_salva:
+                        # Verificamos se está ativo (converte para string para garantir)
+                        status_ativo = str(user_db.iloc[0]['Ativo']).upper()
+                        
+                        if status_ativo == "TRUE":
                             st.session_state.logado = True
                             st.session_state.username = u
-                            st.session_state.user_id = user_db.iloc[0]['id_usuario']
+                            # REMOVIDO: id_usuario (pois não existe na sua planilha atual)
                             st.session_state.pagina = 'home'
                             st.rerun()
-                        else: st.error("Usuário bloqueado.")
-                    else: st.error("Senha incorreta.")
-                else: st.error("Usuário não encontrado.")
+                        else: 
+                            st.error("Usuário bloqueado.")
+                    else: 
+                        st.error("Senha incorreta.")
+                else: 
+                    st.error("Usuário não encontrado.")
             else:
-                st.error("Não foi possível validar as colunas da planilha. Verifique os cabeçalhos.")
+                st.error("Erro técnico: Coluna 'Username' não encontrada na planilha ou base vazia.")
         
         st.write("---")
         if st.button("🆕 Cadastrar novo usuário"):
