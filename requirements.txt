@@ -1,7 +1,5 @@
 streamlit
 pandas
-gspread
 requests
 pytz
-oauth2client
 streamlit-gsheets
