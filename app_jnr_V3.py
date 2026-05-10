@@ -122,23 +122,24 @@ if st.session_state.pagina == 'logon':
         p = st.text_input("Senha", type="password")
         if st.button("Entrar"):
             try:
-                df = conn_gsheets.read()
-            except Exception as e:
-                st.error("Erro ao conectar com a planilha. Verifique o link nos Secrets.")
-                st.stop()
+                # Usando Pandas direto para evitar erro de redirecionamento HTTP
+                url = st.secrets["connections"]["gsheets"]["spreadsheet"]
+                df = pd.read_csv(url)
                 
-            user_db = df[df['Username'] == u]
-            if not user_db.empty:
-                if gerar_hash(p) == user_db.iloc[0]['Senha']:
-                    if user_db.iloc[0]['Ativo']:
-                        st.session_state.logado = True
-                        st.session_state.username = u
-                        st.session_state.user_id = user_db.iloc[0]['id_usuario']
-                        st.session_state.pagina = 'home'
-                        st.rerun()
-                    else: st.error("Usuário bloqueado.")
-                else: st.error("Senha incorreta.")
-            else: st.error("Usuário não encontrado.")
+                user_db = df[df['Username'] == u]
+                if not user_db.empty:
+                    if gerar_hash(p) == user_db.iloc[0]['Senha']:
+                        if user_db.iloc[0]['Ativo']:
+                            st.session_state.logado = True
+                            st.session_state.username = u
+                            st.session_state.user_id = user_db.iloc[0]['id_usuario']
+                            st.session_state.pagina = 'home'
+                            st.rerun()
+                        else: st.error("Usuário bloqueado.")
+                    else: st.error("Senha incorreta.")
+                else: st.error("Usuário não encontrado.")
+            except Exception as e:
+                st.error(f"Erro ao acessar dados: {e}")
         
         st.write("---")
         if st.button("🆕 Cadastrar novo usuário"):
@@ -154,25 +155,39 @@ elif st.session_state.pagina == 'cadastro':
         e = st.text_input("E-mail")
         un = st.text_input("Username")
         ps = st.text_input("Senha", type="password")
+        
         if st.form_submit_button("Finalizar"):
             try:
-                df = conn_gsheets.read()
+                url = st.secrets["connections"]["gsheets"]["spreadsheet"]
+                df = pd.read_csv(url)
+                
+                if un in df['Username'].values: 
+                    st.error("Username já existe.")
+                else:
+                    # Cálculo seguro do novo ID
+                    if df.empty or 'id_usuario' not in df.columns or df['id_usuario'].isnull().all():
+                        new_id = 1
+                    else:
+                        new_id = int(df['id_usuario'].max()) + 1
+                        
+                    novo = pd.DataFrame([{"id_usuario": new_id, "Nome": n, "CPF": c, "e-mail": e, "Username": un, "Senha": gerar_hash(ps), "Ativo": True}])
+                    updated = pd.concat([df, novo], ignore_index=True)
+                    
+                    # Para ATUALIZAR, o conector precisa do link original (sem o /export)
+                    # Mas se você configurou o Secret com o link de exportação, o update pode falhar.
+                    # DICA: Use o link limpo (sem /export) no Secret e o código abaixo faz a mágica:
+                    conn_gsheets.update(worksheet="usuarios", data=updated)
+                    
+                    st.success("Sucesso!")
+                    st.session_state.pagina = 'logon'
+                    st.rerun()
             except Exception as e:
-                st.error("Erro ao conectar com a planilha. Verifique o link nos Secrets.")
-                st.stop()
-            if un in df['Username'].values: st.error("Username já existe.")
-            else:
-                new_id = int(df['id_usuario'].max()) + 1 if not df.empty else 1
-                novo = pd.DataFrame([{"id_usuario": new_id, "Nome": n, "CPF": c, "e-mail": e, "Username": un, "Senha": gerar_hash(ps), "Ativo": True}])
-                updated = pd.concat([df, novo], ignore_index=True)
-                conn_gsheets.update(worksheet="usuarios", data=updated)
-                st.success("Sucesso!")
-                st.session_state.pagina = 'logon'
-                st.rerun()
+                st.error(f"Erro no cadastro: {e}")
+                
     if st.button("Voltar"):
         st.session_state.pagina = 'logon'
         st.rerun()
-
+        
 # TELA HOME (SÓ SE LOGADO)
 elif st.session_state.pagina == 'home' and st.session_state.logado:
     st.markdown(f"<p style='text-align:right'>Olá, <b>{st.session_state.username}</b></p>", unsafe_allow_html=True)
