@@ -121,11 +121,19 @@ st.markdown("""
 # --- FUNÇÃO PARA LER PLANILHA SEM ERRO HTTP ---
 def ler_planilha():
     try:
-        url = st.secrets["connections"]["gsheets"]["spreadsheet"].strip()
-        # index_col=False é essencial para aquele campo vazio não atrapalhar
-        return pd.read_csv(url, index_col=False)
-    except:
-        return pd.DataFrame()
+        # Pega a URL dos Secrets
+        url = st.secrets["connections"]["gsheets"]["url"]
+        
+        # O segredo: forçar o Pandas a ler a partir da primeira linha e tratar como cabeçalho
+        df = pd.read_csv(url, header=0) 
+        
+        # Limpa espaços extras nos nomes das colunas
+        df.columns = df.columns.str.strip()
+        
+        return df
+    except Exception as e:
+        st.error(f"Erro ao ler banco de dados: {e}")
+        return None
 
 # --- TELA DE LOGON ---
 if st.session_state.pagina == 'logon':
