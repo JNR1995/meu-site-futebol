@@ -113,33 +113,25 @@ st.markdown("""
 # --- FUNÇÃO PARA LER PLANILHA SEM ERRO HTTP ---
 def ler_planilha():
     try:
-        # Pega o link do segredo e remove espaços extras
-        url_original = st.secrets["connections"]["gsheets"]["spreadsheet"].strip()
+        # O Streamlit lê o link direto dos Secrets e gere a aba 'usuarios'
+        # O parâmetro ttl=0 garante que ele não use cache de dados antigos
+        df = conn.read(worksheet="usuarios", ttl=0)
         
-        # Extrai o ID da planilha para evitar erros com o final do link
-        # Se o link for https://docs.google.com/spreadsheets/d/ABC/edit, pegamos só até o ABC
-        parts = url_original.split('/')
-        if 'd' in parts:
-            sheet_id = parts[parts.index('d') + 1]
-            # Montamos o link de exportação garantindo o formato CSV e a aba usuários
-            url_csv = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet=usuarios"
-        else:
-            # Fallback caso o link não esteja no padrão esperado
-            url_csv = url_original.replace("/edit", "/export?format=csv")
-
-        df = pd.read_csv(url_csv)
-        
-        # Padronização de colunas (Sua planilha usa 'username' minúsculo)
+        # Limpeza e padronização para evitar erros de nomes de colunas
         if not df.empty:
-            df.columns = [c.strip() for c in df.columns]
-            # Isso evita o erro 'Username' se na planilha estiver minúsculo
+            df.columns = [str(c).strip() for c in df.columns]
+            # Mapeia 'username' (minúsculo na planilha) para 'Username' (usado no seu código)
             df = df.rename(columns={'username': 'Username', 'email': 'e-mail', 'senha': 'Senha'})
-            
         return df
     except Exception as e:
-        st.error(f"Erro Crítico de Conexão: {e}")
+        st.error(f"Erro de Conexão GSheets: {e}")
         return pd.DataFrame()
 
+Jair, o seu trecho de código está logicamente correto, mas para acabar de vez com os erros de conexão e de nomes de colunas que vimos nas imagens anteriores, eu fiz quatro ajustes fundamentais de segurança.
+
+Aqui está a versão revisada e "blindada":
+
+Python
 # --- TELA DE LOGON ---
 if st.session_state.pagina == 'logon':
     st.markdown('<div class="main-title"><span class="parte-cinza">📊FutebolStats</span><span class="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
@@ -148,14 +140,19 @@ if st.session_state.pagina == 'logon':
     col_l1, col_log, col_l2 = st.columns([1, 2, 1])
     with col_log:
         st.write("### 🔐 Acesso")
-        u = st.text_input("Username")
+        u = st.text_input("Username").strip() # .strip() evita espaços acidentais
         p = st.text_input("Senha", type="password")
+        
         if st.button("Entrar"):
             df = ler_planilha()
             
+            # Ajuste 1: Verificação robusta de colunas
             if not df.empty and 'Username' in df.columns:
-                user_db = df[df['Username'] == u]
+                # Ajuste 2: Garantir que a comparação ignore espaços ou tipos diferentes
+                user_db = df[df['Username'].astype(str) == u]
+                
                 if not user_db.empty:
+                    # Ajuste 3: Converter para string para evitar erro de tipo no hash
                     if gerar_hash(p) == str(user_db.iloc[0]['Senha']):
                         if user_db.iloc[0]['Ativo']:
                             st.session_state.logado = True
@@ -167,7 +164,7 @@ if st.session_state.pagina == 'logon':
                     else: st.error("Senha incorreta.")
                 else: st.error("Usuário não encontrado.")
             else:
-                st.error("Erro na estrutura da planilha. Verifique os cabeçalhos.")
+                st.error("Não foi possível validar as colunas da planilha. Verifique os cabeçalhos.")
         
         st.write("---")
         if st.button("🆕 Cadastrar novo usuário"):
@@ -181,30 +178,33 @@ elif st.session_state.pagina == 'cadastro':
         n = st.text_input("Nome Completo")
         c = st.text_input("CPF")
         e = st.text_input("E-mail")
-        un = st.text_input("Username")
+        un = st.text_input("Username").strip()
         ps = st.text_input("Senha", type="password")
         
         if st.form_submit_button("Finalizar"):
             df = ler_planilha()
             
             if not df.empty and 'Username' in df.columns:
-                if un in df['Username'].values: 
+                if un in df['Username'].astype(str).values: 
                     st.error("Username já existe.")
                 else:
-                    # Cálculo seguro do novo ID
-                    new_id = int(df['id_usuario'].max()) + 1 if not df.empty else 1
+                    # Ajuste 4: Cálculo de ID ignorando valores nulos (NaN)
+                    if df['id_usuario'].isnull().all():
+                        new_id = 1
+                    else:
+                        new_id = int(df['id_usuario'].max()) + 1
                     
                     novo = pd.DataFrame([{"id_usuario": new_id, "Nome": n, "CPF": c, "e-mail": e, "Username": un, "Senha": gerar_hash(ps), "Ativo": True}])
                     updated = pd.concat([df, novo], ignore_index=True)
                     
-                    # O update precisa do link original de edição
+                    # Importante: certifique-se que 'conn_gsheets' está definido globalmente
                     conn_gsheets.update(worksheet="usuarios", data=updated)
                     
                     st.success("Sucesso! Agora faça o login.")
                     st.session_state.pagina = 'logon'
                     st.rerun()
             else:
-                st.error("Não foi possível ler a base de dados para o cadastro.")
+                st.error("Erro ao ler banco de dados. Verifique a conexão.")
 
     if st.button("Voltar"):
         st.session_state.pagina = 'logon'
