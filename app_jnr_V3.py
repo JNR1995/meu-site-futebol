@@ -110,7 +110,18 @@ st.markdown("""
 # LÓGICA DE NAVEGAÇÃO DE PÁGINAS
 # =========================================================
 
-# TELA DE LOGON
+# --- FUNÇÃO PARA LER PLANILHA SEM ERRO HTTP ---
+def ler_planilha():
+    try:
+        url_original = st.secrets["connections"]["gsheets"]["spreadsheet"]
+        # Esta linha transforma o link de /edit para /export?format=csv
+        url_csv = url_original.replace("/edit", "/export?format=csv")
+        return pd.read_csv(url_csv)
+    except Exception as e:
+        st.error(f"Erro ao acessar dados: {e}")
+        return pd.DataFrame()
+
+# --- TELA DE LOGON ---
 if st.session_state.pagina == 'logon':
     st.markdown('<div class="main-title"><span class="parte-cinza">📊FutebolStats</span><span class="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">O Mundo do futebol em suas mãos</div>', unsafe_allow_html=True)
@@ -121,14 +132,12 @@ if st.session_state.pagina == 'logon':
         u = st.text_input("Username")
         p = st.text_input("Senha", type="password")
         if st.button("Entrar"):
-            try:
-                # Usando Pandas direto para evitar erro de redirecionamento HTTP
-                url = st.secrets["connections"]["gsheets"]["spreadsheet"]
-                df = pd.read_csv(url)
-                
+            df = ler_planilha()
+            
+            if not df.empty and 'Username' in df.columns:
                 user_db = df[df['Username'] == u]
                 if not user_db.empty:
-                    if gerar_hash(p) == user_db.iloc[0]['Senha']:
+                    if gerar_hash(p) == str(user_db.iloc[0]['Senha']):
                         if user_db.iloc[0]['Ativo']:
                             st.session_state.logado = True
                             st.session_state.username = u
@@ -138,15 +147,15 @@ if st.session_state.pagina == 'logon':
                         else: st.error("Usuário bloqueado.")
                     else: st.error("Senha incorreta.")
                 else: st.error("Usuário não encontrado.")
-            except Exception as e:
-                st.error(f"Erro ao acessar dados: {e}")
+            else:
+                st.error("Erro na estrutura da planilha. Verifique os cabeçalhos.")
         
         st.write("---")
         if st.button("🆕 Cadastrar novo usuário"):
             st.session_state.pagina = 'cadastro'
             st.rerun()
 
-# TELA DE CADASTRO
+# --- TELA DE CADASTRO ---
 elif st.session_state.pagina == 'cadastro':
     st.title("📝 Cadastro")
     with st.form("c"):
@@ -157,33 +166,27 @@ elif st.session_state.pagina == 'cadastro':
         ps = st.text_input("Senha", type="password")
         
         if st.form_submit_button("Finalizar"):
-            try:
-                url = st.secrets["connections"]["gsheets"]["spreadsheet"]
-                df = pd.read_csv(url)
-                
+            df = ler_planilha()
+            
+            if not df.empty and 'Username' in df.columns:
                 if un in df['Username'].values: 
                     st.error("Username já existe.")
                 else:
                     # Cálculo seguro do novo ID
-                    if df.empty or 'id_usuario' not in df.columns or df['id_usuario'].isnull().all():
-                        new_id = 1
-                    else:
-                        new_id = int(df['id_usuario'].max()) + 1
-                        
+                    new_id = int(df['id_usuario'].max()) + 1 if not df.empty else 1
+                    
                     novo = pd.DataFrame([{"id_usuario": new_id, "Nome": n, "CPF": c, "e-mail": e, "Username": un, "Senha": gerar_hash(ps), "Ativo": True}])
                     updated = pd.concat([df, novo], ignore_index=True)
                     
-                    # Para ATUALIZAR, o conector precisa do link original (sem o /export)
-                    # Mas se você configurou o Secret com o link de exportação, o update pode falhar.
-                    # DICA: Use o link limpo (sem /export) no Secret e o código abaixo faz a mágica:
+                    # O update precisa do link original de edição
                     conn_gsheets.update(worksheet="usuarios", data=updated)
                     
-                    st.success("Sucesso!")
+                    st.success("Sucesso! Agora faça o login.")
                     st.session_state.pagina = 'logon'
                     st.rerun()
-            except Exception as e:
-                st.error(f"Erro no cadastro: {e}")
-                
+            else:
+                st.error("Não foi possível ler a base de dados para o cadastro.")
+
     if st.button("Voltar"):
         st.session_state.pagina = 'logon'
         st.rerun()
