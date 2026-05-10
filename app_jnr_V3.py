@@ -5,15 +5,15 @@ import hashlib
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
+# --- CONEXÃO COM GOOGLE SHEETS E SQLITE ---
+conn = st.connection("gsheets", type=GSheetsConnection)
+
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Futebol Stats Jnr", layout="wide")
 
 # --- FUNÇÃO DE SEGURANÇA (HASH) ---
 def gerar_hash(senha):
     return hashlib.sha256(str.encode(senha)).hexdigest()
-
-# --- CONEXÃO COM GOOGLE SHEETS E SQLITE ---
-conn = st.connection("gsheets", type=GSheetsConnection)
 
 def salvar_favorito(fix_id):
     # Aqui depois adaptaremos para salvar no Sheets por usuário, 
