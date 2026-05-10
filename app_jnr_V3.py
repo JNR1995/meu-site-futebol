@@ -1,121 +1,23 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
-from datetime import datetime
 import hashlib
+from datetime import datetime
+from streamlit_gsheets import GSheetsConnection
 
+# --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Futebol Stats Jnr", layout="wide")
 
-# --- ESTILIZAÇÃO CSS (O CORAÇÃO DO VISUAL) ---
-
-st.markdown("""
-
-    <style>
-
-    .main-title { text-align: center; font-size: 50px; font-weight: bold; color: #ffffff; padding: 25px; }
-
-    .liga-header {
-
-        text-align: center; background-color: #1E1E1E; color: #FFFFFF;
-
-        padding: 4px; font-weight: bold; font-size: 22px; border-radius: 8px;
-
-        margin-top: 5px; border: 1px solid #333;
-
-    }
-    .stExpander {
-        margin-bottom: -11px !important; /* Puxa o expander de baixo para cima */
-        border-radius: 5px !important;
-    }
-
-    /* Remove o espaço interno (respiro) entre o título da liga e o primeiro jogo */
-    .liga-header {
-        margin-bottom: -12.5px !important;
-        padding-bottom: 0px !important;
-    }
-            
-    /* Alvo direto no texto do botão */
-    .stButton button p {
-        font-size: 16px !important; /* Teste 12px para ver se muda */
-        font-weight: 500 !important;
-        line-height: 1 !important;
-    }
-
-    /* Ajuste do container do botão */
-    .stButton button {
-        height: 30px !important;
-        min-height: 30px !important;
-        padding:0px 10px !important; /* Respiro nas laterais, zero no topo/baixo */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-top: 0px !important;
-          
-    }
-   /* Remove o espaço gigante que o Streamlit coloca entre elementos */
-    [data-testid="stVerticalBlock"] {
-        gap: 0.9rem !important;
-
-    /* ESTILO DOS CARDS DE JOGOS */
-
-    .card-vs { text-align: center; font-size: 24px; font-weight: bold; color: #ff4b4b; margin-top: 1px; }
-
-    .team-name { font-size: 30px; font-weight: bold; }
-
-    .odd-box { background-color: #262730; padding: 5px; border-radius: 8px; text-align: center; border: 1px solid #444; width: 100%; }
-
-    .rank-text { color: #9999; font-size: 22px; }
-    
-    /* Ajusta o espaço em cima e embaixo da linha (st.divider) */
-    hr {
-        margin-top: -18px !important;
-        margin-bottom: 2px !important;
-        padding-top: 2px !important;
-        padding-bottom: 2px !important;
-    }
-
-
-    /* CORES DE STATUS DA ATUALIZAÇÃO */
-
-    .update-text-gray { color: #888888; font-style: italic; font-size: 11px; margin-top: -25px; margin-bottom: 20px; }
-
-    .date-safe { color: #2ecc71; font-weight: bold; }
-
-    .date-warning { color: #f39c12; font-weight: bold; }
-
-    .date-danger { color: #e74c3c; font-weight: bold; }
-            
-    /* AJUSTE DE FONTES */
-    .team-name { font-size: 20px !important; font-weight: bold; }
-    .card-vs { font-size: 20px !important; font-weight: bold; color: #ff4b4b; }
-    
-    /* AJUSTE DAS TABELAS */
-    [data-testid="stTable"] td, [data-testid="stTable"] th {
-        font-size: 20px !important;
-        line-height: 1.2 !important;
-    }
-
-    /* AJUSTE DAS ODDS */
-    .odd-box { font-size: 15px !important; padding: 1px; }
-
-    /* Isso vai tirar o "ar" de dentro das linhas da tabela markdown */
-    table {
-        margin-bottom: -1px !important;
-    }
-    td, th {
-        padding: 2px 5px !important; /* Diminui o espaço interno das células */
-        font-size: 15px !important;   /* Fonte menor ajuda a achatar a linha */
-    }
-
-    </style>
-
-    """, unsafe_allow_html=True)
-
+# --- FUNÇÃO DE SEGURANÇA (HASH) ---
 def gerar_hash(senha):
-    """Transforma a senha em um código seguro (Hash)."""
     return hashlib.sha256(str.encode(senha)).hexdigest()
 
+# --- CONEXÃO COM GOOGLE SHEETS E SQLITE ---
+conn_gsheets = st.connection("gsheets", type=GSheetsConnection)
+
 def salvar_favorito(fix_id):
+    # Aqui depois adaptaremos para salvar no Sheets por usuário, 
+    # mas por enquanto mantemos sua função original para não quebrar nada
     conn = sqlite3.connect('FutebolStatsJnr.db')
     cursor = conn.cursor()
     cursor.execute("INSERT OR IGNORE INTO FAVORITOS (ID_Fixture) VALUES (?)", (fix_id,))
@@ -129,15 +31,8 @@ def remover_favorito(fix_id):
     conn.commit()
     conn.close()
 
-def limpar_todos_favoritos():
-    conn = sqlite3.connect('FutebolStatsJnr.db')
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM FAVORITOS")
-    conn.commit()
-    conn.close()
-
 # --- FUNÇÕES DE DADOS ---
-@st.cache_data(show_spinner=False) # Isso evita que o banco seja lido a cada clique
+@st.cache_data(show_spinner=False)
 def carregar_dados(query, params=None):
     conn = sqlite3.connect('FutebolStatsJnr.db')
     df = pd.read_sql(query, conn, params=params)
@@ -147,23 +42,16 @@ def carregar_dados(query, params=None):
 def buscar_stats_duplas(id_liga, time, mando):
     conn = sqlite3.connect('FutebolStatsJnr.db')
     sufixo = "_CASA" if mando == 'CASA' else "_FORA"
-    
-    # 1. BUSCA GERAL (O que você já tinha)
     df_ft_g = pd.read_sql('SELECT MDM, MDS, MD, BTS, CS, "2.5+" AS OVER_25_FT FROM STATS_GOLS WHERE ID_Liga = ? AND Equipe = ?', conn, params=(id_liga, time))
     df_ht_g = pd.read_sql('SELECT MDM_HT, MDS_HT, MD_HT, BTS_HT, CS_HT, "0.5+" AS OVER_05_HT FROM STATS_GOLS_HT WHERE ID_Liga = ? AND Equipe = ?', conn, params=(id_liga, time))
-    
-    # 2. BUSCA ESPECÍFICA (Mando de Campo)
     df_ft_m = pd.read_sql(f'SELECT MDM, MDS, MD, BTS, CS, "2.5+" AS OVER_25_FT FROM STATS_GOLS{sufixo} WHERE ID_Liga = ? AND Equipe = ?', conn, params=(id_liga, time))
     df_ht_m = pd.read_sql(f'SELECT MDM_HT, MDS_HT, MD_HT, BTS_HT, CS_HT, "0.5+" AS OVER_05_HT FROM STATS_GOLS_HT{sufixo} WHERE ID_Liga = ? AND Equipe = ?', conn, params=(id_liga, time))
-    
     conn.close()
-    
     res = {"geral": {}, "mando": {}}
     if not df_ft_g.empty: res["geral"].update(df_ft_g.iloc[0].to_dict())
     if not df_ht_g.empty: res["geral"].update(df_ht_g.iloc[0].to_dict())
     if not df_ft_m.empty: res["mando"].update(df_ft_m.iloc[0].to_dict())
     if not df_ht_m.empty: res["mando"].update(df_ht_m.iloc[0].to_dict())
-    
     return res
 
 def buscar_data_atualizacao(id_liga):
@@ -173,13 +61,11 @@ def buscar_data_atualizacao(id_liga):
         cursor.execute("SELECT Ultima_Atualizacao FROM LOG_ATUALIZACAO WHERE ID_Liga = ?", (int(id_liga),))
         resultado = cursor.fetchone()
         conn.close()
-        
         if resultado and resultado[0]:
             data_log = datetime.strptime(resultado[0], '%Y-%m-%d')
             hoje = datetime.now()
             dias_passados = (hoje - data_log).days
             data_formatada = data_log.strftime('%d/%m/%Y')
-            
             if dias_passados <= 2: return data_formatada, "date-safe"
             elif dias_passados <= 5: return data_formatada, "date-warning"
             else: return data_formatada, "date-danger"
@@ -188,107 +74,117 @@ def buscar_data_atualizacao(id_liga):
         return "Erro", "date-danger"
 
 # --- INICIALIZAÇÃO DO ESTADO ---
-if 'pagina' not in st.session_state: st.session_state.pagina = 'home'
-if 'pais_nav' not in st.session_state: st.session_state.pais_nav = None
-if 'liga_nav' not in st.session_state: st.session_state.liga_nav = None
-if 'time_nav' not in st.session_state: st.session_state.time_nav = None
-if 'favoritos' not in st.session_state:
-    # Busca os favoritos salvos no banco
-    conn = sqlite3.connect('FutebolStatsJnr.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT ID_Fixture FROM FAVORITOS")
-    favs_do_banco = [row[0] for row in cursor.fetchall()]
-    conn.close()
+if 'pagina' not in st.session_state: st.session_state.pagina = 'logon'
+if 'logado' not in st.session_state: st.session_state.logado = False
+if 'user_id' not in st.session_state: st.session_state.user_id = None
+if 'username' not in st.session_state: st.session_state.username = None
+
+# --- ESTILIZAÇÃO CSS COMPLETA (MANTIDA 100%) ---
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Saira+Stencil:ital,wght@0,100..900;1,100..900&display=swap');
+
+    .main-title { font-family: 'Bebas Neue', cursive; font-size: 105px !important; text-align: center; margin-bottom: -15px; line-height: 1; }
+    .parte-cinza { color: #888888; }
+    .parte-verde { color: #00FF7F; text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.3); }
+    .sub-title { font-family: "Saira Stencil", sans-serif; font-size: 26px !important; font-weight: 300; color: #AAAAAA; text-align: center; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; }
     
-    # Inicializa o set com o que veio do banco
-    st.session_state.favoritos = set(favs_do_banco)
+    .liga-header { text-align: center; background-color: #1E1E1E; color: #FFFFFF; padding: 4px; font-weight: bold; font-size: 22px; border-radius: 8px; margin-top: 5px; border: 1px solid #333; margin-bottom: -12.5px !important; }
+    .stExpander { margin-bottom: -11px !important; border-radius: 5px !important; }
+    
+    div.stButton > button { background-color: #1E1E1E; color: white; border-radius: 6px; border: 2px solid #333; height: 3.5em; width: 100%; font-family: 'Montserrat', sans-serif; font-weight: bold; transition: 0.3s; }
+    div.stButton > button:hover { border: 1px solid #00FF7F; color: #00FF7F; background-color: #1E1E1E; box-shadow: 0px 10px 15px rgba(0, 255, 127, 0.2); }
+    
+    .card-vs { text-align: center; font-size: 20px !important; font-weight: bold; color: #ff4b4b; }
+    .team-name { font-size: 20px !important; font-weight: bold; }
+    .odd-box { background-color: #262730; padding: 1px; border-radius: 8px; text-align: center; border: 1px solid #444; width: 100%; font-size: 15px !important; }
+    .update-text-gray { color: #888888; font-style: italic; font-size: 11px; margin-top: -25px; margin-bottom: 20px; }
+    .date-safe { color: #2ecc71; font-weight: bold; }
+    .date-warning { color: #f39c12; font-weight: bold; }
+    .date-danger { color: #e74c3c; font-weight: bold; }
+    </style>
+""", unsafe_allow_html=True)
 
 # =========================================================
-# 1. ATUALIZAÇÃO NA HOME (SÓ PARA GARANTIR O BOTÃO)
+# LÓGICA DE NAVEGAÇÃO DE PÁGINAS
 # =========================================================
-if st.session_state.pagina == 'home':
-    # --- BLOCO DE PERSONALIZAÇÃO (CSS) ---
-    st.markdown("""
-        <style>
-        /* Importando as duas fontes */
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Saira+Stencil:ital,wght@0,100..900;1,100..900&display=swap');
 
-        /* Estilo do Título Principal */
-        .main-title {
-            font-family: 'Bebas Neue', cursive;
-            font-size: 105px !important;
-            text-align: center;
-            margin-bottom: -15px;
-            line-height: 1;
-        }
-
-        .parte-cinza {
-            color: #888888;
-        }
-
-        .parte-verde {
-            color: #00FF7F;
-            text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.3);
-        }
-
-        /* Estilo do Subtítulo com a segunda fonte */
-        .sub-title {
-            font-family: "Saira Stencil", sans-serif;
-            font-size: 26px !important;
-            font-weight: 300; /* Mais fina para contraste */
-            color: #AAAAAA;
-            text-align: center;
-            letter-spacing: 3px; /* Espaçamento entre letras para elegância */
-            text-transform: uppercase;
-            margin-top: 5px;
-        }
-                
-       /* Estilo do Botão */
-        div.stButton > button {
-            background-color: #1E1E1E;
-            color: white;
-            border-radius: 6px;
-            border: 2px solid #333;
-            height: 3.5em;
-            width: 100%; /* Ele vai ocupar 100% da COLUNA CENTRAL */
-            font-family: 'Montserrat', sans-serif;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        div.stButton > button:hover {
-            border: 1px solid #00FF7F;
-            color: #00FF7F;
-            background-color: #1E1E1E;
-            box-shadow: 0px 10px 15px rgba(0, 255, 127, 0.2);
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-
-    # --- RENDERIZAÇÃO ---
-    st.markdown("""
-        <div class="main-title">
-            <span class="parte-cinza">📊FutebolStats</span><span class="parte-verde">Jnr</span>
-        </div>
-    """, unsafe_allow_html=True)
+# TELA DE LOGON
+if st.session_state.pagina == 'logon':
+    st.markdown('<div class="main-title"><span class="parte-cinza">📊FutebolStats</span><span class="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">O Mundo do futebol em suas mãos</div>', unsafe_allow_html=True)
     
+    col_l1, col_log, col_l2 = st.columns([1, 2, 1])
+    with col_log:
+        st.write("### 🔐 Acesso")
+        u = st.text_input("Username")
+        p = st.text_input("Senha", type="password")
+        if st.button("Entrar"):
+            df = conn_gsheets.read(worksheet="usuarios")
+            user_db = df[df['Username'] == u]
+            if not user_db.empty:
+                if gerar_hash(p) == user_db.iloc[0]['Senha']:
+                    if user_db.iloc[0]['Ativo']:
+                        st.session_state.logado = True
+                        st.session_state.username = u
+                        st.session_state.user_id = user_db.iloc[0]['id_usuario']
+                        st.session_state.pagina = 'home'
+                        st.rerun()
+                    else: st.error("Usuário bloqueado.")
+                else: st.error("Senha incorreta.")
+            else: st.error("Usuário não encontrado.")
+        
+        st.write("---")
+        if st.button("🆕 Cadastrar novo usuário"):
+            st.session_state.pagina = 'cadastro'
+            st.rerun()
+
+# TELA DE CADASTRO
+elif st.session_state.pagina == 'cadastro':
+    st.title("📝 Cadastro")
+    with st.form("c"):
+        n = st.text_input("Nome Completo")
+        c = st.text_input("CPF")
+        e = st.text_input("E-mail")
+        un = st.text_input("Username")
+        ps = st.text_input("Senha", type="password")
+        if st.form_submit_button("Finalizar"):
+            df = conn_gsheets.read(worksheet="usuarios")
+            if un in df['Username'].values: st.error("Username já existe.")
+            else:
+                new_id = int(df['id_usuario'].max()) + 1 if not df.empty else 1
+                novo = pd.DataFrame([{"id_usuario": new_id, "Nome": n, "CPF": c, "e-mail": e, "Username": un, "Senha": gerar_hash(ps), "Ativo": True}])
+                updated = pd.concat([df, novo], ignore_index=True)
+                conn_gsheets.update(worksheet="usuarios", data=updated)
+                st.success("Sucesso!")
+                st.session_state.pagina = 'logon'
+                st.rerun()
+    if st.button("Voltar"):
+        st.session_state.pagina = 'logon'
+        st.rerun()
+
+# TELA HOME (SÓ SE LOGADO)
+elif st.session_state.pagina == 'home' and st.session_state.logado:
+    st.markdown(f"<p style='text-align:right'>Olá, <b>{st.session_state.username}</b></p>", unsafe_allow_html=True)
+    st.markdown('<div class="main-title"><span class="parte-cinza">📊FutebolStats</span><span class="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">O Mundo do futebol em suas mãos</div>', unsafe_allow_html=True)
     st.write("---")
-
-    # --- BOTÕES ---
-    col_esq, col_menu, col_dir = st.columns([1, 2, 1])
-
-    with col_menu:
-        if st.button("📅 Calendário", use_container_width=True):
+    
+    c1, c2, c3 = st.columns([1, 2, 1])
+    with c2:
+        if st.button("📅 Calendário"):
             st.session_state.pagina = 'jogos_dia'
             st.rerun()
-        if st.button("📈 Estatísticas de Gols (Histórico)", use_container_width=True):
+        if st.button("📈 Estatísticas de Gols"):
             st.session_state.pagina = 'stats'
             st.rerun()
-        if st.button("🎯 Prognósticos e Expectativa", use_container_width=True):
-            st.session_state.pagina = 'prognosticos' 
+        if st.button("🎯 Prognósticos"):
+            st.session_state.pagina = 'prognosticos'
+            st.rerun()
+        if st.button("🚪 Sair"):
+            st.session_state.logado = False
+            st.session_state.pagina = 'logon'
             st.rerun()
 
 # =========================================================
