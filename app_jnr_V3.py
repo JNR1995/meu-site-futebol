@@ -424,16 +424,27 @@ elif st.session_state.pagina == 'stats':
 # 3. PÁGINA JOGOS DO DIA (HOJE, AMANHÃ E FAVORITOS)
 # =========================================================
 elif st.session_state.pagina == 'jogos_dia':
-    st.sidebar.header("Menu de Navegação")
-    if st.sidebar.button("⬅️ Voltar ao Início"):
-        st.session_state.pagina = 'home'
-        st.rerun()
+    # ... (seu código de botões do sidebar e título)
 
-    if st.sidebar.button("🔄 Atualizar Dados"):
-        st.cache_data.clear()
-        st.rerun()
+    # CORREÇÃO AQUI: Precisamos carregar os jogos ANTES de pegar as ligas_na_tela
+    # Vamos buscar os jogos de HOJE e AMANHÃ para ter a lista completa do que carregar
+    df_proximos = carregar_dados('''
+        SELECT ID_Liga FROM JOGOS_HOJE
+        UNION
+        SELECT ID_Liga FROM JOGOS_AMANHA
+    ''')
 
-    st.title("📅 Calendário de Jogos")
+    if not df_proximos.empty:
+        ligas_na_tela = df_proximos['ID_Liga'].unique()
+        
+        # 2. Criamos o "Banco de Dados Temporário" na memória RAM (Bulk Load)
+        if 'stats_globais' not in st.session_state:
+             stats_globais = {}
+             for id_l in ligas_na_tela:
+                 stats_globais[id_l] = carregar_stats_completas_liga(id_l)
+             st.session_state.stats_globais = stats_globais
+    else:
+        st.session_state.stats_globais = {}
 
     # 1. Pegamos as ligas que aparecem na tela (ex: Australia Northern, Mexico Liga MX)
     ligas_na_tela = df_jogos['ID_Liga'].unique()
