@@ -121,23 +121,22 @@ st.markdown("""
 def ler_planilha():
     try:
         url = st.secrets["connections"]["gsheets"]["spreadsheet"].strip()
-        # index_col=False garante que ele não crie essa coluna extra de números
+        # index_col=False impede a criação dessa coluna extra de números
         df = pd.read_csv(url, index_col=False)
         
-        # Remove linhas que estejam totalmente vazias
+        # O pulo do gato: remove linhas onde TODAS as colunas são vazias
         df = df.dropna(how='all')
         
         if not df.empty:
+            # Garante que não existam espaços nos nomes das colunas
             df.columns = [str(c).strip() for c in df.columns]
-            # Mapeamento para garantir que o código encontre 'Username'
-            df = df.rename(columns={'username': 'Username', 'Senha': 'Senha'})
             
-            # Converte id_usuario para numérico, tratando erros
+            # Converte a coluna id_usuario para número, ignorando erros de 'None'
             df['id_usuario'] = pd.to_numeric(df['id_usuario'], errors='coerce')
-        
+            
         return df
     except Exception as e:
-        st.error(f"Erro de Conexão: {e}")
+        st.error(f"Erro Crítico de Conexão: {e}")
         return pd.DataFrame()
 
 # --- TELA DE LOGON ---
@@ -201,7 +200,7 @@ elif st.session_state.pagina == 'cadastro':
                         new_id = 1
                     else:
                         # Ignora os NaNs/Nones para pegar o maior número real
-                        new_id = int(df['id_usuario'].dropna().max()) + 1
+                        new_id = int(df['id_usuario'].dropna().max()) + 1 if not df['id_usuario'].dropna().empty else 1
                     
                     novo = pd.DataFrame([{"id_usuario": new_id, "Nome": n, "CPF": c, "e-mail": e, "Username": un, "Senha": gerar_hash(ps), "Ativo": True}])
                     updated = pd.concat([df, novo], ignore_index=True)
