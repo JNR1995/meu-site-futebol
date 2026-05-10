@@ -114,11 +114,20 @@ st.markdown("""
 def ler_planilha():
     try:
         url_original = st.secrets["connections"]["gsheets"]["spreadsheet"]
-        # Esta linha transforma o link de /edit para /export?format=csv
-        url_csv = url_original.replace("/edit", "/export?format=csv")
-        return pd.read_csv(url_csv)
+        # Limpa o link de qualquer resquício de gid ou edit
+        url_base = url_original.split("/edit")[0]
+        url_csv = f"{url_base}/export?format=csv&gid=0"
+        df = pd.read_csv(url_csv)
+        
+        # AJUSTE CRÍTICO: Força o nome das colunas para bater com o código
+        # Isso resolve o erro 'Username' mesmo se na planilha estiver minúsculo
+        if not df.empty:
+            df.columns = [c.strip() for c in df.columns] # Remove espaços invisíveis
+            # Mapeia 'username' para 'Username' caso esteja errado na planilha
+            df = df.rename(columns={'username': 'Username', 'email': 'e-mail'})
+        return df
     except Exception as e:
-        st.error(f"Erro ao acessar dados: {e}")
+        st.error(f"Erro de conexão: {e}")
         return pd.DataFrame()
 
 # --- TELA DE LOGON ---
