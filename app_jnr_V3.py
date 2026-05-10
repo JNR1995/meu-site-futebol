@@ -9,6 +9,12 @@ from streamlit_gsheets import GSheetsConnection
 # --- CONEXÃO COM GOOGLE SHEETS E SQLITE ---
 conn = st.connection("gsheets", type=GSheetsConnection)
 
+if 'favoritos' not in st.session_state:
+    st.session_state.favoritos = set()
+
+if 'username' not in st.session_state:
+    st.session_state.username = None
+
 try:
     df = conn.read()
     st.success("Conectado!")
@@ -406,9 +412,11 @@ elif st.session_state.pagina == 'jogos_dia':
 
     # --- FUNÇÃO DO CARD (ESTRELA FORA DO EXPANDER) ---
     def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
-        fix_id = row['ID_Fixture']
-        is_fav = fix_id in st.session_state.favoritos
-
+    fix_id = row['ID_Fixture']
+    # Se 'favoritos' não existir, ele usa um set() vazio e não quebra
+    favoritos_set = st.session_state.get('favoritos', set())
+    is_fav = fix_id in favoritos_set
+        
         if encerrado:
             # Mostra o placar no título do expander
             label_jogo = f"🏁 {row['Hora']} | {row['Home_Team']} {row['Gols_Home_FT']} x {row['Gols_Away_FT']} {row['Away_Team']}"
