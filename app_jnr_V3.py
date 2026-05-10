@@ -2,6 +2,7 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 import hashlib
+import requests
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 
@@ -195,15 +196,30 @@ elif st.session_state.pagina == 'cadastro':
             if username_existe:
                 st.error("Username já existe.")
             else:
-                # 4. Criamos o novo registro SEM o campo id_usuario
-                novo_usuario = {
+                # Criamos os dados exatamente como o robô do Google espera
+                payload = {
                     "Nome": n, 
                     "CPF": c, 
-                    "e-mail": e, 
+                    "e_mail": e, 
                     "Username": un, 
                     "Senha": gerar_hash(ps), 
-                    "Ativo": True
+                    "Ativo": "True"
                 }
+                
+                try:
+                    # COLE A URL QUE VOCÊ COPIOU DO GOOGLE AQUI
+                    url_script = "SUA_URL_DO_APPS_SCRIPT_AQUI"
+                    
+                    response = requests.post(url_script, json=payload)
+                    
+                    if response.status_code == 200:
+                        st.success("Cadastro realizado com sucesso na planilha!")
+                        st.session_state.pagina = 'logon'
+                        st.rerun()
+                    else:
+                        st.error("Erro ao enviar para a planilha.")
+                except Exception as erro:
+                    st.error(f"Erro na comunicação: {erro}")
                 
                 # Transformamos em DataFrame para o concat
                 novo_df = pd.DataFrame([novo_usuario])
