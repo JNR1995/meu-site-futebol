@@ -127,11 +127,6 @@ def ler_planilha():
         st.error(f"Erro de Conexão GSheets: {e}")
         return pd.DataFrame()
 
-Jair, o seu trecho de código está logicamente correto, mas para acabar de vez com os erros de conexão e de nomes de colunas que vimos nas imagens anteriores, eu fiz quatro ajustes fundamentais de segurança.
-
-Aqui está a versão revisada e "blindada":
-
-Python
 # --- TELA DE LOGON ---
 if st.session_state.pagina == 'logon':
     st.markdown('<div class="main-title"><span class="parte-cinza">📊FutebolStats</span><span class="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
