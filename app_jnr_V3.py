@@ -14,13 +14,13 @@ try:
     st.write(df)
 except Exception as e:
     st.error(e)
-
-# --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Futebol Stats Jnr", layout="wide")
-
+    
 # --- FUNÇÃO DE SEGURANÇA (HASH) ---
 def gerar_hash(senha):
     return hashlib.sha256(str.encode(senha)).hexdigest()
+
+# --- CONFIGURAÇÃO DA PÁGINA ---
+st.set_page_config(page_title="Futebol Stats Jnr", layout="wide")
 
 def salvar_favorito(fix_id):
     # Aqui depois adaptaremos para salvar no Sheets por usuário, 
@@ -120,18 +120,24 @@ st.markdown("""
 # --- FUNÇÃO PARA LER PLANILHA SEM ERRO HTTP ---
 def ler_planilha():
     try:
-        # O Streamlit lê o link direto dos Secrets e gere a aba 'usuarios'
-        # O parâmetro ttl=0 garante que ele não use cache de dados antigos
-        df = conn.read(worksheet="usuarios", ttl=0)
+        url = st.secrets["connections"]["gsheets"]["spreadsheet"].strip()
+        # index_col=False garante que ele não crie essa coluna extra de números
+        df = pd.read_csv(url, index_col=False)
         
-        # Limpeza e padronização para evitar erros de nomes de colunas
+        # Remove linhas que estejam totalmente vazias
+        df = df.dropna(how='all')
+        
         if not df.empty:
             df.columns = [str(c).strip() for c in df.columns]
-            # Mapeia 'username' (minúsculo na planilha) para 'Username' (usado no seu código)
-            df = df.rename(columns={'username': 'Username', 'email': 'e-mail', 'senha': 'Senha'})
+            # Mapeamento para garantir que o código encontre 'Username'
+            df = df.rename(columns={'username': 'Username', 'Senha': 'Senha'})
+            
+            # Converte id_usuario para numérico, tratando erros
+            df['id_usuario'] = pd.to_numeric(df['id_usuario'], errors='coerce')
+        
         return df
     except Exception as e:
-        st.error(f"Erro de Conexão GSheets: {e}")
+        st.error(f"Erro de Conexão: {e}")
         return pd.DataFrame()
 
 # --- TELA DE LOGON ---
@@ -191,10 +197,11 @@ elif st.session_state.pagina == 'cadastro':
                     st.error("Username já existe.")
                 else:
                     # Ajuste 4: Cálculo de ID ignorando valores nulos (NaN)
-                    if df['id_usuario'].isnull().all():
+                    if df.empty or df['id_usuario'].isnull().all():
                         new_id = 1
                     else:
-                        new_id = int(df['id_usuario'].max()) + 1
+                        # Ignora os NaNs/Nones para pegar o maior número real
+                        new_id = int(df['id_usuario'].dropna().max()) + 1
                     
                     novo = pd.DataFrame([{"id_usuario": new_id, "Nome": n, "CPF": c, "e-mail": e, "Username": un, "Senha": gerar_hash(ps), "Ativo": True}])
                     updated = pd.concat([df, novo], ignore_index=True)
