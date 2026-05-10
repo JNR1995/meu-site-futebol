@@ -200,7 +200,7 @@ elif st.session_state.pagina == 'cadastro':
                 
                 try:
                     # COLE A URL QUE VOCÊ COPIOU DO GOOGLE (Apps Script) AQUI
-                    url_script = "https://script.google.com/u/0/home/projects/1z-MQwJWpaVvJyfAG9Pc1yMSSLnLp1uBQtuNw4D1hmWWZdQns_umdLlvW/edit"
+                    url_script = "https://script.google.com/macros/s/AKfycbwWH_TCzS9OI8la35nOPsb9aTGQLnEgKdFZdM6YKqdGU3XvcaOZQq3fn0x3H8IxFfY7GA/exec"
                     
                     # 3. Enviamos direto para o Script do Google
                     response = requests.post(url_script, json=dados_para_envio)
