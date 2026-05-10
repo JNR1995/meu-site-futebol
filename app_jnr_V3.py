@@ -73,6 +73,31 @@ def atualizar_favoritos_sheets(fix_id, acao):
     # 2. Envia de volta para o Google Sheets
     conn.update(worksheet="FAVORITOS", data=df_atual)
 
+@st.cache_data(ttl=3600)
+def carregar_stats_completas_liga(id_liga):
+    # Unificamos as 6 tabelas em uma única linha por time
+    query = f"""
+    SELECT 
+        g.Equipe,
+        g.MD AS MD_FT_Geral,
+        gc.MD AS MD_FT_Casa,
+        gf.MD AS MD_FT_Fora,
+        ht.MD_HT AS MD_HT_Geral,
+        htc.MD_HT AS MD_HT_Casa,
+        htf.MD_HT AS MD_HT_Fora
+    FROM STATS_GOLS g
+    LEFT JOIN STATS_GOLS_CASA gc ON g.Equipe = gc.Equipe AND g.ID_Liga = gc.ID_Liga
+    LEFT JOIN STATS_GOLS_FORA gf ON g.Equipe = gf.Equipe AND g.ID_Liga = gf.ID_Liga
+    LEFT JOIN STATS_GOLS_HT ht ON g.Equipe = ht.Equipe AND g.ID_Liga = ht.ID_Liga
+    LEFT JOIN STATS_GOLS_HT_CASA htc ON g.Equipe = htc.Equipe AND g.ID_Liga = htc.ID_Liga
+    LEFT JOIN STATS_GOLS_HT_FORA htf ON g.Equipe = htf.Equipe AND g.ID_Liga = htf.ID_Liga
+    WHERE g.ID_Liga = {id_liga}
+    """
+    df = carregar_dados(query) # Sua função que executa o SQL no SQLite
+    
+    # Transformamos em dicionário: { 'Nome do Time': { 'MD_FT_Geral': 1.5, ... }, ... }
+    return df.set_index('Equipe').to_dict('index')
+
 # --- FUNÇÕES DE DADOS ---
 @st.cache_data(show_spinner=False)
 def carregar_dados(query, params=None):
@@ -409,6 +434,24 @@ elif st.session_state.pagina == 'jogos_dia':
         st.rerun()
 
     st.title("📅 Calendário de Jogos")
+
+    # 1. Pegamos as ligas que aparecem na tela (ex: Australia Northern, Mexico Liga MX)
+    ligas_na_tela = df_jogos['ID_Liga'].unique()
+    
+    # 2. Criamos o "Banco de Dados Temporário" na memória RAM
+    stats_globais = {}
+    for id_l in ligas_na_tela:
+        stats_globais[id_l] = carregar_stats_completas_liga(id_l)
+    
+    # 3. No loop que gera os cards da imagem:
+    for _, jogo in df_jogos.iterrows():
+        id_liga_atual = jogo['ID_Liga']
+        nome_casa = jogo['Home_Team']
+        nome_fora = jogo['Away_Team']
+        
+        # BUSCA INSTANTÂNEA: Pegamos os dados direto do dicionário, sem banco!
+        stats_casa = stats_globais.get(id_liga_atual, {}).get(nome_casa, {})
+        stats_fora = stats_globais.get(id_liga_atual, {}).get(nome_fora, {})
 
     # --- FUNÇÃO DO CARD (ESTRELA FORA DO EXPANDER) ---
     def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False): # Adicionado ":"
