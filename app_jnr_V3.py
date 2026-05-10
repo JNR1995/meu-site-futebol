@@ -411,12 +411,14 @@ elif st.session_state.pagina == 'jogos_dia':
     st.title("📅 Calendário de Jogos")
 
     # --- FUNÇÃO DO CARD (ESTRELA FORA DO EXPANDER) ---
-    def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
-    fix_id = row['ID_Fixture']
-    # Se 'favoritos' não existir, ele usa um set() vazio e não quebra
-    favoritos_set = st.session_state.get('favoritos', set())
-    is_fav = fix_id in favoritos_set
+    def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False): # Adicionado ":"
+        # TODAS AS LINHAS ABAIXO DEVEM TER UM RECUO (TAB OU 4 ESPAÇOS)
+        fix_id = row['ID_Fixture']
         
+        # Se 'favoritos' não existir, ele usa um set() vazio e não quebra
+        favoritos_set = st.session_state.get('favoritos', set())
+        is_fav = fix_id in favoritos_set
+            
         if encerrado:
             # Mostra o placar no título do expander
             label_jogo = f"🏁 {row['Hora']} | {row['Home_Team']} {row['Gols_Home_FT']} x {row['Gols_Away_FT']} {row['Away_Team']}"
