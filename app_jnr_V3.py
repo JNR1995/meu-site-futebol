@@ -24,8 +24,14 @@ def gerar_hash(senha):
 st.set_page_config(page_title="Futebol Stats Jnr", layout="wide")
 
 def salvar_favorito(fix_id):
-    # Aqui depois adaptaremos para salvar no Sheets por usuário, 
-    # mas por enquanto mantemos sua função original para não quebrar nada
+    # 1. Atualiza no Sheets (Tabela 'FAVORITOS')
+    # Supomos que sua função de salvar no sheets aceite o email do usuário e o ID
+    email_usuario = st.session_state.get('usuario_email', 'convidado')
+    
+    # Aqui você chama sua função de escrita no Google Sheets
+    # Exemplo: adicionar_linha_sheets("FAVORITOS", [email_usuario, fix_id])
+    
+    # 2. Mantém o SQLite como cache temporário (opcional)
     conn = sqlite3.connect('FutebolStatsJnr.db')
     cursor = conn.cursor()
     cursor.execute("INSERT OR IGNORE INTO FAVORITOS (ID_Fixture) VALUES (?)", (fix_id,))
@@ -33,11 +39,33 @@ def salvar_favorito(fix_id):
     conn.close()
 
 def remover_favorito(fix_id):
+    # 1. Remove do Sheets
+    email_usuario = st.session_state.get('usuario_email', 'convidado')
+    # Exemplo: remover_linha_sheets("FAVORITOS", email_usuario, fix_id)
+
+    # 2. Remove do SQLite
     conn = sqlite3.connect('FutebolStatsJnr.db')
     cursor = conn.cursor()
     cursor.execute("DELETE FROM FAVORITOS WHERE ID_Fixture = ?", (fix_id,))
     conn.commit()
     conn.close()
+    
+def atualizar_favoritos_sheets(fix_id, acao):
+    # 1. Lê a base atual de favoritos
+    df_atual = conn.read(worksheet="FAVORITOS")
+    username = st.session_state.username
+
+    if acao == "adicionar":
+        # Cria uma nova linha
+        nova_linha = pd.DataFrame([{"Username": username, "ID_Fixture": fix_id}])
+        df_atual = pd.concat([df_atual, nova_linha], ignore_index=True)
+    
+    elif acao == "remover":
+        # Remove a linha que contém o usuário AND o ID do jogo
+        df_atual = df_atual[~((df_atual['Username'] == username) & (df_atual['ID_Fixture'] == fix_id))]
+
+    # 2. Envia de volta para o Google Sheets
+    conn.update(worksheet="FAVORITOS", data=df_atual)
 
 # --- FUNÇÕES DE DADOS ---
 @st.cache_data(show_spinner=False)
@@ -181,7 +209,27 @@ if st.session_state.pagina == 'logon':
                     st.error("Usuário não encontrado.")
             else:
                 st.error("Erro técnico: Coluna 'Username' não encontrada na planilha ou base vazia.")
-        
+                
+                if login_sucesso: # <--- AQUI COMEÇA O TRECHO
+                    st.session_state.username = username_digitado 
+                    st.success(f"Bem-vindo, {username_digitado}!")
+            
+                    # AGORA ENTRA A SINCRONIZAÇÃO:
+                    try:
+                        # Lemos a aba de favoritos uma única vez no login
+                        df_favs_geral = conn.read(worksheet="FAVORITOS")
+                        
+                        # Filtramos o que é SEU
+                        meus_favs = df_favs_geral[df_favs_geral['Username'] == st.session_state.username]
+                        
+                        # Guardamos na memória para a estrela brilhar nos jogos certos
+                        st.session_state.favoritos = set(meus_favs['ID_Fixture'].tolist())
+                    except Exception:
+                        # Caso a aba esteja vazia (primeiro uso), garante que não dê erro
+                        st.session_state.favoritos = set()
+                        
+                    st.rerun() # Recarrega para já mostrar os favoritos na tela
+                    
         st.write("---")
         if st.button("🆕 Cadastrar novo usuário"):
             st.session_state.pagina = 'cadastro'
@@ -390,13 +438,16 @@ elif st.session_state.pagina == 'jogos_dia':
         with col_fav_icon:
             icone = "⭐" if fix_id in st.session_state.favoritos else "✩"
             
-            if st.button(icone, key=f"fav_{fix_id}_{suffix}"):
+            if st.button(icone, key=f"btn_{fix_id}"):
                 if fix_id in st.session_state.favoritos:
+                    # Lógica para remover
                     st.session_state.favoritos.remove(fix_id)
-                    remover_favorito(fix_id) # REMOVE DO BANCO
+                    atualizar_favoritos_sheets(fix_id, "remover")
                 else:
+                    # Lógica para adicionar
                     st.session_state.favoritos.add(fix_id)
-                    salvar_favorito(fix_id)  # SALVA NO BANCO
+                    atualizar_favoritos_sheets(fix_id, "adicionar")
+                
                 st.rerun()
 
         with col_expander:
