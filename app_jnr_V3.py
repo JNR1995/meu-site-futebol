@@ -121,22 +121,9 @@ st.markdown("""
 def ler_planilha():
     try:
         url = st.secrets["connections"]["gsheets"]["spreadsheet"].strip()
-        # index_col=False impede a criação dessa coluna extra de números
-        df = pd.read_csv(url, index_col=False)
-        
-        # O pulo do gato: remove linhas onde TODAS as colunas são vazias
-        df = df.dropna(how='all')
-        
-        if not df.empty:
-            # Garante que não existam espaços nos nomes das colunas
-            df.columns = [str(c).strip() for c in df.columns]
-            
-            # Converte a coluna id_usuario para número, ignorando erros de 'None'
-            df['id_usuario'] = pd.to_numeric(df['id_usuario'], errors='coerce')
-            
-        return df
-    except Exception as e:
-        st.error(f"Erro Crítico de Conexão: {e}")
+        # index_col=False é essencial para aquele campo vazio não atrapalhar
+        return pd.read_csv(url, index_col=False)
+    except:
         return pd.DataFrame()
 
 # --- TELA DE LOGON ---
