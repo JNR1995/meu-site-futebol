@@ -208,7 +208,7 @@ elif st.session_state.pagina == 'cadastro':
                 
                 try:
                     # COLE A URL QUE VOCÊ COPIOU DO GOOGLE AQUI
-                    url_script = "SUA_URL_DO_APPS_SCRIPT_AQUI"
+                    url_script = "https://script.google.com/macros/s/AKfycbyDaEJeBBu3XAp2NJpnBV5z6XaCzgfqsKVvZPDSPOv3yJYp0MTDH5SqUmrweqGnE_TXkg/exec"
                     
                     response = requests.post(url_script, json=payload)
                     
