@@ -188,7 +188,7 @@ elif st.session_state.pagina == 'cadastro':
             if username_existe:
                 st.error("Username já existe.")
             else:
-                # 2. Prepara os dados para o Google
+                # 2. Prepara os dados para o Google Apps Script
                 dados_para_envio = {
                     "Nome": n, 
                     "CPF": c, 
@@ -199,39 +199,20 @@ elif st.session_state.pagina == 'cadastro':
                 }
                 
                 try:
-                    # COLE A URL QUE VOCÊ COPIOU DO GOOGLE (Apps Script) AQUI
                     url_script = "https://script.google.com/macros/s/AKfycbxADULGppQvqhIYZ6SB9f4XvNd2LSKdm1R5iYbfpKl6uzZayg5ik1F09DsdAziJu6ZkOw/exec"
                     
-                    # 3. Envia os dados
-                    response = requests.post(url_script, json=dados_para_envio)
+                    # O segredo para evitar o 401 em redirecionamentos do Google
+                    response = requests.post(url_script, json=dados_para_envio, allow_redirects=True)
                     
-                    if response.status_code == 200:
+                    # O Google às vezes retorna 302 (redirecionamento), verificamos se deu certo
+                    if response.status_code == 200 or "Sucesso" in response.text:
                         st.success("Cadastro realizado com sucesso!")
                         st.session_state.pagina = 'logon'
                         st.rerun()
                     else:
-                        # Se der 401 de novo, o erro aparecerá aqui
-                        st.error(f"Erro de autorização no Google (Status {response.status_code}). Verifique se o Script está para 'Qualquer pessoa'.")
+                        st.error(f"Erro no Google (Status {response.status_code}). Tente re-implantar o script como 'Qualquer pessoa'.")
                 except Exception as erro:
                     st.error(f"Erro na conexão: {erro}")
-                
-                # Transformamos em DataFrame para o concat
-                novo_df = pd.DataFrame([novo_usuario])
-                
-                # Unimos com os dados existentes
-                updated = pd.concat([df, novo_df], ignore_index=True)
-                
-                # 5. Forçamos o envio garantindo a ordem das colunas na planilha
-                # Isso vai garantir que Nome fique em A, CPF em B, etc.
-                updated = updated[colunas_esperadas]
-                
-                try:
-                    conn.update(worksheet="usuarios", data=updated)
-                    st.success("Sucesso! Agora faça o login.")
-                    st.session_state.pagina = 'logon'
-                    st.rerun()
-                except Exception as erro:
-                    st.error(f"Erro ao salvar na planilha: {erro}")
 
     if st.button("Voltar"):
         st.session_state.pagina = 'logon'
