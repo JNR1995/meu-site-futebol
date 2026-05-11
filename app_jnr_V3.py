@@ -438,8 +438,7 @@ elif st.session_state.pagina == 'jogos_dia':
     # --- FUNÇÃO DO CARD (ESTRELA REMOVIDA - FOCO NO EXPANDER) ---
    def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
         fix_id = row['ID_Fixture']
-        is_fav = fix_id in st.session_state.favoritos
-
+       
         if encerrado:
             # Mostra o placar no título do expander
             label_jogo = f"🏁 {row['Hora']} | {row['Home_Team']} {row['Gols_Home_FT']} x {row['Gols_Away_FT']} {row['Away_Team']}"
