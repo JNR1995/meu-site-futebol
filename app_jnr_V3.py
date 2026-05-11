@@ -436,28 +436,31 @@ elif st.session_state.pagina == 'jogos_dia':
     st.title("📅 Calendário de Jogos")
 
     # --- FUNÇÃO DO CARD (ESTRELA REMOVIDA - FOCO NO EXPANDER) ---
-   def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
+    def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
         fix_id = row['ID_Fixture']
-       
+
         if encerrado:
-            # Mostra o placar no título do expander
             label_jogo = f"🏁 {row['Hora']} | {row['Home_Team']} {row['Gols_Home_FT']} x {row['Gols_Away_FT']} {row['Away_Team']}"
         else:
-            # Mostra o formato padrão de agendamento
-            label_jogo = f"⏰ {row['Hora']} | {row['Home_Team']} x {row['Away_Team']}"
-
-       with col_expander:
             if mostrar_liga_no_label:
                 label_jogo = f"⏰ {row['Hora']} | {row['Pais']} - {row['Liga_Nome']} | {row['Home_Team']} x {row['Away_Team']}"
-                
             else:
                 label_jogo = f"⏰ {row['Hora']} | {row['Home_Team']} x {row['Away_Team']}"
-                
-            # TUDO o que é análise deve ficar DENTRO deste expander único
-            with st.expander(label_jogo, expanded=False):
-                # Layout de ODDS e TIMES que você já usa
-                c1, c2, c3 = st.columns([2.5, 1, 2.5])
-                with c1:
+        
+        # Estilização do botão de estatísticas no final
+        st.markdown("""
+            <style>
+            .stButton > button {
+                background-color: transparent;
+                padding: 8px !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        # Agora usamos a largura total para o expander, sem a coluna do ícone
+        with st.expander(label_jogo, expanded=False):
+            c1, c2, c3 = st.columns([2.5, 1, 2.5])
+            with c1:
                     st.markdown(f"<div><span class='rank-text'>{row['Pos_Home']}º</span> <b class='team-name'>{row['Home_Team']}</b></div>", unsafe_allow_html=True)
                     st.markdown(f"<div class='odd-box'>Casa: <b>{row['Odd_Home']:.2f}</b></div>", unsafe_allow_html=True)
                 with c2:
