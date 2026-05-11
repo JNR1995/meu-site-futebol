@@ -536,9 +536,9 @@ elif st.session_state.pagina == 'jogos_dia':
 
                 st.divider()
 
-                # Busca estatísticas
-                data_h = buscar_stats_duplas(row['ID_Liga'], row['Home_Team'], 'CASA')
-                data_a = buscar_stats_duplas(row['ID_Liga'], row['Away_Team'], 'FORA')
+                stats_da_liga = st.session_state.stats_globais.get(row['ID_Liga'], {})
+                s_h_m = stats_da_liga.get(row['Home_Team'], {})
+                s_a_m = stats_da_liga.get(row['Away_Team'], {})
 
                 if data_h and data_a:
                     s_h_g, s_h_m = data_h["geral"], data_h["mando"]
