@@ -468,7 +468,8 @@ elif st.session_state.pagina == 'jogos_dia':
         with col_expander:
             # O seu expander original começa aqui
             with st.expander(label_jogo, expanded=False):
-        
+
+            st.write("Seu conteúdo completo de análise entra aqui...")
         # Estilização do botão de estatísticas no final
         st.markdown("""
             <style>
