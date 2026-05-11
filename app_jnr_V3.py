@@ -546,6 +546,8 @@ elif st.session_state.pagina == 'jogos_dia':
                         | BTS HT | **{s_h_m.get('BTS_HT',0):.0f}%** | **{s_a_m.get('BTS_HT',0):.0f}%** |
                         | CS HT | **{s_h_m.get('CS_HT',0):.0f}%** | **{s_a_m.get('CS_HT',0):.0f}%** |
                         """)
+
+                    st.markdown("<br>", unsafe_allow_html=True)
     
                     # Cálculos de Expectativa
                     exp_over25_g = (s_h_g.get('OVER_25_FT', 0) + s_a_g.get('OVER_25_FT', 0)) / 2
@@ -556,6 +558,20 @@ elif st.session_state.pagina == 'jogos_dia':
                     exp_bts_m = (s_h_m.get('BTS',0) + s_a_m.get('BTS',0)) / 2
                     exp_05ht_g = (s_h_g.get('OVER_05_HT', 0) + s_a_g.get('OVER_05_HT', 0)) / 2
 
+                    # --- EXIBIÇÃO NO CARD ---
+                    st.markdown("---")
+                    # Injeta um estilo específico para o container das colunas de expectativa
+                    st.markdown("""
+                        <style>
+                        .container-expectativas {
+                            margin-top: 20px !important;  /* Ajuste este valor para subir mais ou menos */
+                        }
+                        </style>
+                    """, unsafe_allow_html=True)
+
+                    # Abre a div customizada antes das colunas
+                    st.markdown('<div class="container-expectativas">', unsafe_allow_html=True)
+                    
                     col_exp1, col_exp2 = st.columns(2)
 
                     with col_exp1:
