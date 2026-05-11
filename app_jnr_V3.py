@@ -424,55 +424,22 @@ elif st.session_state.pagina == 'stats':
 # 3. PÁGINA JOGOS DO DIA (HOJE, AMANHÃ E FAVORITOS)
 # =========================================================
 elif st.session_state.pagina == 'jogos_dia':
-    # ... (seu código de botões do sidebar e título)
+    st.sidebar.header("Menu de Navegação")
+    if st.sidebar.button("⬅️ Voltar ao Início"):
+        st.session_state.pagina = 'home'
+        st.rerun()
 
-    # CORREÇÃO AQUI: Precisamos carregar os jogos ANTES de pegar as ligas_na_tela
-    # Vamos buscar os jogos de HOJE e AMANHÃ para ter a lista completa do que carregar
-    df_proximos = carregar_dados('''
-        SELECT ID_Liga FROM JOGOS_HOJE
-        UNION
-        SELECT ID_Liga FROM JOGOS_AMANHA
-    ''')
+    if st.sidebar.button("🔄 Atualizar Dados"):
+        st.cache_data.clear()
+        st.rerun()
 
-    if not df_proximos.empty:
-        ligas_na_tela = df_proximos['ID_Liga'].unique()
-        
-        # 2. Criamos o "Banco de Dados Temporário" na memória RAM (Bulk Load)
-        if 'stats_globais' not in st.session_state:
-             stats_globais = {}
-             for id_l in ligas_na_tela:
-                 stats_globais[id_l] = carregar_stats_completas_liga(id_l)
-             st.session_state.stats_globais = stats_globais
-    else:
-        st.session_state.stats_globais = {}
-
-    # 1. Pegamos as ligas que aparecem na tela (ex: Australia Northern, Mexico Liga MX)
-    ligas_na_tela = df_jogos['ID_Liga'].unique()
-    
-    # 2. Criamos o "Banco de Dados Temporário" na memória RAM
-    stats_globais = {}
-    for id_l in ligas_na_tela:
-        stats_globais[id_l] = carregar_stats_completas_liga(id_l)
-    
-    # 3. No loop que gera os cards da imagem:
-    for _, jogo in df_jogos.iterrows():
-        id_liga_atual = jogo['ID_Liga']
-        nome_casa = jogo['Home_Team']
-        nome_fora = jogo['Away_Team']
-        
-        # BUSCA INSTANTÂNEA: Pegamos os dados direto do dicionário, sem banco!
-        stats_casa = stats_globais.get(id_liga_atual, {}).get(nome_casa, {})
-        stats_fora = stats_globais.get(id_liga_atual, {}).get(nome_fora, {})
+    st.title("📅 Calendário de Jogos")
 
     # --- FUNÇÃO DO CARD (ESTRELA FORA DO EXPANDER) ---
-    def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False): # Adicionado ":"
-        # TODAS AS LINHAS ABAIXO DEVEM TER UM RECUO (TAB OU 4 ESPAÇOS)
+    def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
         fix_id = row['ID_Fixture']
-        
-        # Se 'favoritos' não existir, ele usa um set() vazio e não quebra
-        favoritos_set = st.session_state.get('favoritos', set())
-        is_fav = fix_id in favoritos_set
-            
+        is_fav = fix_id in st.session_state.favoritos
+
         if encerrado:
             # Mostra o placar no título do expander
             label_jogo = f"🏁 {row['Hora']} | {row['Home_Team']} {row['Gols_Home_FT']} x {row['Gols_Away_FT']} {row['Away_Team']}"
@@ -502,16 +469,13 @@ elif st.session_state.pagina == 'jogos_dia':
         with col_fav_icon:
             icone = "⭐" if fix_id in st.session_state.favoritos else "✩"
             
-            if st.button(icone, key=f"btn_{fix_id}"):
+            if st.button(icone, key=f"fav_{fix_id}_{suffix}"):
                 if fix_id in st.session_state.favoritos:
-                    # Lógica para remover
                     st.session_state.favoritos.remove(fix_id)
-                    atualizar_favoritos_sheets(fix_id, "remover")
+                    remover_favorito(fix_id) # REMOVE DO BANCO
                 else:
-                    # Lógica para adicionar
                     st.session_state.favoritos.add(fix_id)
-                    atualizar_favoritos_sheets(fix_id, "adicionar")
-                
+                    salvar_favorito(fix_id)  # SALVA NO BANCO
                 st.rerun()
 
         with col_expander:
@@ -536,9 +500,9 @@ elif st.session_state.pagina == 'jogos_dia':
 
                 st.divider()
 
-                stats_da_liga = st.session_state.stats_globais.get(row['ID_Liga'], {})
-                s_h_m = stats_da_liga.get(row['Home_Team'], {})
-                s_a_m = stats_da_liga.get(row['Away_Team'], {})
+                # Busca estatísticas
+                data_h = buscar_stats_duplas(row['ID_Liga'], row['Home_Team'], 'CASA')
+                data_a = buscar_stats_duplas(row['ID_Liga'], row['Away_Team'], 'FORA')
 
                 if data_h and data_a:
                     s_h_g, s_h_m = data_h["geral"], data_h["mando"]
