@@ -58,69 +58,58 @@ def remover_favorito(fix_id):
     conn.close()
 
 # =========================================================
-# LÓGICA DE FAVORITOS (VIA GIF HUB E GOOGLE SHEETS
+# LÓGICA DE FAVORITOS (SIMPLIFICADA VIA st.connection)
 # =========================================================
 
-def get_aba_favoritos():
-    """Acessa a aba específica de favoritos no Google Sheets"""
-    URL_SHEET = "https://docs.google.com/spreadsheets/d/1A5qGIgoCAAoCgEVX57yViEraggoKEc5QkmLoB2VvzWU/export?format=csv"
-    sh = client.open_by_url(URL_SHEET)
-    return sh.worksheet("FavoritosUser")
-
-def salvar_favorito_gs(fix_id):
-    """Salva o favorito vinculado ao utilizador logado"""
-    try:
-        aba = get_aba_favoritos()
-        user = st.session_state.get('username', 'Admin') # 'Admin' como fallback
-        
-        # Verifica se já existe para não duplicar na planilha
-        dados = aba.get_all_records()
-        df_favs = pd.DataFrame(dados)
-        
-        if not df_favs.empty:
-            existe = df_favs[(df_favs['Username'] == user) & (df_favs['ID_Fixture'] == int(fix_id))]
-            if not existe.empty:
-                return # Já existe, não faz nada
-
-        aba.append_row([user, int(fix_id)])
-    except Exception as e:
-        st.error(f"Erro ao salvar favorito no Sheets: {e}")
-
-def remover_favorito_gs(fix_id):
-    """Remove a linha do favorito do utilizador logado"""
-    try:
-        aba = get_aba_favoritos()
-        user = st.session_state.get('username', 'Admin')
-        
-        dados = aba.get_all_records()
-        # Encontra a linha correta (gspread usa índice 1 e header é linha 1, então dados começam na 2)
-        for i, row in enumerate(dados, start=2):
-            if row['Username'] == user and row['ID_Fixture'] == int(fix_id):
-                aba.delete_rows(i)
-                break
-    except Exception as e:
-        st.error(f"Erro ao remover favorito no Sheets: {e}")
-
 def carregar_favoritos_gs():
-    """Lê todos os favoritos do utilizador logado para o session_state"""
+    """Lê favoritos da aba FavoritosUser usando a conexão nativa"""
     try:
-        aba = get_aba_favoritos()
+        # Lê a aba específica
+        df_favs = conn.read(worksheet="FavoritosUser")
         user = st.session_state.get('username', 'Admin')
-        
-        dados = aba.get_all_records()
-        df_favs = pd.DataFrame(dados)
         
         if df_favs.empty:
             return set()
             
-        # Filtra apenas os favoritos do user atual
+        # Filtra os favoritos do usuário logado
         meus_favs = df_favs[df_favs['Username'] == user]['ID_Fixture'].tolist()
         return set(meus_favs)
-    except:
+    except Exception as e:
+        # Se a aba estiver vazia ou não existir, retorna set vazio
         return set()
 
-#  FIM LÓGICA DE FAVORITOS
-# =========================================================
+def salvar_favorito_gs(fix_id):
+    """Adiciona uma linha na planilha"""
+    try:
+        user = st.session_state.get('username', 'Admin')
+        # Busca os dados atuais para atualizar
+        df_atual = conn.read(worksheet="FavoritosUser")
+        
+        # Cria a nova linha
+        nova_linha = pd.DataFrame([{"Username": user, "ID_Fixture": int(fix_id)}])
+        
+        # Junta com o que já existe e remove duplicados
+        df_novo = pd.concat([df_atual, nova_linha], ignore_index=True).drop_duplicates()
+        
+        # Atualiza a planilha (sobrescreve com a lista nova)
+        conn.update(worksheet="FavoritosUser", data=df_novo)
+    except Exception as e:
+        st.error(f"Erro ao salvar: {e}")
+
+def remover_favorito_gs(fix_id):
+    """Remove a linha da planilha"""
+    try:
+        user = st.session_state.get('username', 'Admin')
+        df_atual = conn.read(worksheet="FavoritosUser")
+        
+        if not df_atual.empty:
+            # Mantém apenas o que NÃO é o id que queremos remover
+            df_filtrado = df_atual[~((df_atual['Username'] == user) & (df_atual['ID_Fixture'] == int(fix_id)))]
+            conn.update(worksheet="FavoritosUser", data=df_filtrado)
+    except Exception as e:
+        st.error(f"Erro ao remover: {e}")
+        
+# ========= FIM LÓGICA DE FAVORITOS =========
 
 @st.cache_data(ttl=3600)
 def carregar_stats_completas_liga(id_liga):
