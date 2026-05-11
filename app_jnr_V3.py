@@ -424,6 +424,44 @@ elif st.session_state.pagina == 'stats':
 # 3. PÁGINA JOGOS DO DIA (HOJE, AMANHÃ E FAVORITOS)
 # =========================================================
 elif st.session_state.pagina == 'jogos_dia':
+    # --- CSS CUSTOMIZADO PARA "COLAR" A ESTRELA NO EXPANDER ---
+    st.markdown("""
+        <style>
+        /* Remove o espaço entre as colunas do card */
+        [data-testid="column"] {
+            width: min-content !important;
+            flex: unset !important;
+            padding: 0px !important;
+            margin: 0px !important;
+        }
+        
+        /* Estilização do botão da Estrela */
+        .stButton > button {
+            border: none !important;
+            background-color: #31333F !important; /* Cor idêntica ao fundo do expander */
+            color: #888 !important;
+            font-size: 22px !important;
+            padding: 7px 12px !important;
+            margin-top: 2px !important; /* Ajuste fino de alinhamento vertical */
+            border-radius: 5px 0px 0px 5px !important; /* Arredonda só o lado esquerdo */
+            height: 46px !important; /* Mesma altura padrão do expander */
+        }
+        
+        /* Estrela Ativa (Dourada) */
+        .stButton > button:active, .stButton > button:focus {
+            color: #FFD700 !important;
+            box-shadow: none !important;
+        }
+
+        /* Ajuste do Expander para "colar" na estrela */
+        .stExpander {
+            border-radius: 0px 5px 5px 0px !important; /* Arredonda só o lado direito */
+            border-left: none !important; /* Remove a borda divisória */
+            margin-left: -1px !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
     st.sidebar.header("Menu de Navegação")
     if st.sidebar.button("⬅️ Voltar ao Início"):
         st.session_state.pagina = 'home'
