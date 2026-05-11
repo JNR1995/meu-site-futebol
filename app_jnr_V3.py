@@ -63,7 +63,7 @@ def remover_favorito(fix_id):
 
 def get_aba_favoritos():
     """Acessa a aba específica de favoritos no Google Sheets"""
-    URL_SHEET = "https://docs.google.com/spreadsheets/d/1A5qGIgoCAAoCgEVX57yViEraggoKEc5QkmLoB2VvzWU/edit?usp=sharing"
+    URL_SHEET = "https://docs.google.com/spreadsheets/d/1A5qGIgoCAAoCgEVX57yViEraggoKEc5QkmLoB2VvzWU/export?format=csv"
     sh = client.open_by_url(URL_SHEET)
     return sh.worksheet("FavoritosUser")
 
