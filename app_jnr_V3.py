@@ -424,44 +424,6 @@ elif st.session_state.pagina == 'stats':
 # 3. PÁGINA JOGOS DO DIA (HOJE, AMANHÃ E FAVORITOS)
 # =========================================================
 elif st.session_state.pagina == 'jogos_dia':
-    # --- CSS CUSTOMIZADO PARA "COLAR" A ESTRELA NO EXPANDER ---
-    st.markdown("""
-        <style>
-        /* Remove o espaço entre as colunas do card */
-        [data-testid="column"] {
-            width: min-content !important;
-            flex: unset !important;
-            padding: 0px !important;
-            margin: 0px !important;
-        }
-        
-        /* Estilização do botão da Estrela */
-        .stButton > button {
-            border: none !important;
-            background-color: #31333F !important; /* Cor idêntica ao fundo do expander */
-            color: #888 !important;
-            font-size: 22px !important;
-            padding: 7px 12px !important;
-            margin-top: 2px !important; /* Ajuste fino de alinhamento vertical */
-            border-radius: 5px 0px 0px 5px !important; /* Arredonda só o lado esquerdo */
-            height: 46px !important; /* Mesma altura padrão do expander */
-        }
-        
-        /* Estrela Ativa (Dourada) */
-        .stButton > button:active, .stButton > button:focus {
-            color: #FFD700 !important;
-            box-shadow: none !important;
-        }
-
-        /* Ajuste do Expander para "colar" na estrela */
-        .stExpander {
-            border-radius: 0px 5px 5px 0px !important; /* Arredonda só o lado direito */
-            border-left: none !important; /* Remove a borda divisória */
-            margin-left: -1px !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-    
     st.sidebar.header("Menu de Navegação")
     if st.sidebar.button("⬅️ Voltar ao Início"):
         st.session_state.pagina = 'home'
@@ -474,35 +436,24 @@ elif st.session_state.pagina == 'jogos_dia':
     st.title("📅 Calendário de Jogos")
 
     # --- FUNÇÃO DO CARD (ESTRELA REMOVIDA - FOCO NO EXPANDER) ---
-    def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
+   def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
         fix_id = row['ID_Fixture']
-
-        # 1. Lógica da Estrela
         is_fav = fix_id in st.session_state.favoritos
-        icone = "★" if is_fav else "☆"
-    
-        # 2. Definição do Label
+
         if encerrado:
+            # Mostra o placar no título do expander
             label_jogo = f"🏁 {row['Hora']} | {row['Home_Team']} {row['Gols_Home_FT']} x {row['Gols_Away_FT']} {row['Away_Team']}"
         else:
+            # Mostra o formato padrão de agendamento
+            label_jogo = f"⏰ {row['Hora']} | {row['Home_Team']} x {row['Away_Team']}"
+
+       with col_expander:
             if mostrar_liga_no_label:
                 label_jogo = f"⏰ {row['Hora']} | {row['Pais']} - {row['Liga_Nome']} | {row['Home_Team']} x {row['Away_Team']}"
+                
             else:
                 label_jogo = f"⏰ {row['Hora']} | {row['Home_Team']} x {row['Away_Team']}"
-
-        # 3. Criamos a linha dividida: Estrela à esquerda, Expander à direita
-        col_fav_icon, col_expander = st.columns([0.4, 9.6], gap="small")
-    
-        with col_fav_icon:
-            # Botão da Estrela (Independente do Expander)
-            if st.button(icone, key=f"fav_{fix_id}_{suffix}"):
-                if fix_id in st.session_state.favoritos:
-                    st.session_state.favoritos.remove(fix_id)
-                else:
-                    st.session_state.favoritos.add(fix_id)
-                st.rerun()
-    
-        with col_expander:
+                
             # TUDO o que é análise deve ficar DENTRO deste expander único
             with st.expander(label_jogo, expanded=False):
                 # Layout de ODDS e TIMES que você já usa
