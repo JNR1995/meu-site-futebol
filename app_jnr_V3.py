@@ -477,10 +477,11 @@ elif st.session_state.pagina == 'jogos_dia':
     def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
         fix_id = row['ID_Fixture']
 
-        # 1. Lógica da Estrela (Visual apenas por enquanto)
+        # 1. Lógica da Estrela
         is_fav = fix_id in st.session_state.favoritos
         icone = "★" if is_fav else "☆"
     
+        # 2. Definição do Label
         if encerrado:
             label_jogo = f"🏁 {row['Hora']} | {row['Home_Team']} {row['Gols_Home_FT']} x {row['Gols_Away_FT']} {row['Away_Team']}"
         else:
@@ -489,48 +490,33 @@ elif st.session_state.pagina == 'jogos_dia':
             else:
                 label_jogo = f"⏰ {row['Hora']} | {row['Home_Team']} x {row['Away_Team']}"
 
-        # Criamos a linha dividida: Estrela à esquerda, Expander à direita
+        # 3. Criamos a linha dividida: Estrela à esquerda, Expander à direita
         col_fav_icon, col_expander = st.columns([0.4, 9.6], gap="small")
     
         with col_fav_icon:
-            # Este botão salva no Sheets mas NÃO abre o expander
+            # Botão da Estrela (Independente do Expander)
             if st.button(icone, key=f"fav_{fix_id}_{suffix}"):
                 if fix_id in st.session_state.favoritos:
                     st.session_state.favoritos.remove(fix_id)
-                    # Futura função: remover_do_sheets(fix_id)
                 else:
                     st.session_state.favoritos.add(fix_id)
-                    # Futura função: salvar_no_sheets(fix_id)
                 st.rerun()
     
         with col_expander:
-            # O seu expander original começa aqui
+            # TUDO o que é análise deve ficar DENTRO deste expander único
             with st.expander(label_jogo, expanded=False):
-
-            st.write("Seu conteúdo completo de análise entra aqui...")
-        # Estilização do botão de estatísticas no final
-        st.markdown("""
-            <style>
-            .stButton > button {
-                background-color: transparent;
-                padding: 8px !important;
-            }
-            </style>
-        """, unsafe_allow_html=True)
-
-        # Agora usamos a largura total para o expander, sem a coluna do ícone
-        with st.expander(label_jogo, expanded=False):
-            c1, c2, c3 = st.columns([2.5, 1, 2.5])
-            with c1:
-                st.markdown(f"<div><span class='rank-text'>{row['Pos_Home']}º</span> <b class='team-name'>{row['Home_Team']}</b></div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='odd-box'>Casa: <b>{row['Odd_Home']:.2f}</b></div>", unsafe_allow_html=True)
-            with c2:
-                st.markdown("<div class='card-vs'>VS</div>", unsafe_allow_html=True)
-                st.markdown(f"<p style='text-align:center; color:#888; font-size: 13px;'>Empate<br><b>{row['Odd_Draw']:.2f}</b></p>", unsafe_allow_html=True)
-            with c3:
-                st.markdown(f"<div style='text-align:right;'><b class='team-name'>{row['Away_Team']}</b> <span class='rank-text'>{row['Pos_Away']}º</span></div>", unsafe_allow_html=True)
-                st.markdown(f"<div class='odd-box'>Fora: <b>{row['Odd_Away']:.2f}</b></div>", unsafe_allow_html=True)
-
+                # Layout de ODDS e TIMES que você já usa
+                c1, c2, c3 = st.columns([2.5, 1, 2.5])
+                with c1:
+                    st.markdown(f"<div><span class='rank-text'>{row['Pos_Home']}º</span> <b class='team-name'>{row['Home_Team']}</b></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='odd-box'>Casa: <b>{row['Odd_Home']:.2f}</b></div>", unsafe_allow_html=True)
+                with c2:
+                    st.markdown("<div class='card-vs'>VS</div>", unsafe_allow_html=True)
+                    st.markdown(f"<p style='text-align:center; color:#888; font-size: 13px;'>Empate<br><b>{row['Odd_Draw']:.2f}</b></p>", unsafe_allow_html=True)
+                with c3:
+                    st.markdown(f"<div style='text-align:right;'><b class='team-name'>{row['Away_Team']}</b> <span class='rank-text'>{row['Pos_Away']}º</span></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='odd-box'>Fora: <b>{row['Odd_Away']:.2f}</b></div>", unsafe_allow_html=True)
+                    
             st.divider()
 
             data_h = buscar_stats_duplas(row['ID_Liga'], row['Home_Team'], 'CASA')
