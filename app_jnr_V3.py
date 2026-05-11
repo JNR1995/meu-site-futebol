@@ -215,25 +215,18 @@ st.markdown("""
 # --- FUNÇÃO PARA LER PLANILHA SEM ERRO HTTP ---
 def ler_planilha():
     try:
-        # Tenta pegar pela chave 'spreadsheet' que você já usava antes
-        if "connections" in st.secrets and "gsheets" in st.secrets["connections"]:
-            url = st.secrets["connections"]["gsheets"]["spreadsheet"].strip()
-        else:
-            # Se não achar, tenta pegar direto se você colocou sem hierarquia
-            url = st.secrets["spreadsheet"].strip()
-
-        # Lê a planilha forçando o cabeçalho na primeira linha
-        df = pd.read_csv(url)
+        # Usa a conexão oficial que você já configurou com a Conta de Serviço
+        # 'usuarios' é o nome da aba que vi na sua imagem
+        df = conn.read(worksheet="usuarios", ttl=0)
         
-        # LIMPEZA CRÍTICA: Remove espaços dos nomes das colunas
-        # Isso resolve o erro de "Coluna Username não encontrada"
+        # Limpeza de colunas
         df.columns = [str(c).strip() for c in df.columns]
         
         return df
     except Exception as e:
-        st.error(f"Erro ao ler banco de dados: {e}")
-        return pd.DataFrame() # Retorna um DF vazio em vez de None para não quebrar o login
-
+        st.error(f"Erro ao ler banco de dados via GSheets: {e}")
+        return pd.DataFrame()
+        
 # --- TELA DE LOGON ---
 if st.session_state.pagina == 'logon':
     st.markdown('<div class="main-title"><span class="parte-cinza">📊FutebolStats</span><span class="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
@@ -267,7 +260,7 @@ if st.session_state.pagina == 'logon':
                             # --- SINCRONIZAÇÃO DE FAVORITOS ---
                             try:
                                 # Tenta ler a aba de favoritos usando a conexão segura
-                                df_favs_geral = conn.read(worksheet="FAVORITOS", ttl=0)
+                                df_favs_geral = conn.read(worksheet="FavoritosUser", ttl=0)
                                 if not df_favs_geral.empty and 'Username' in df_favs_geral.columns:
                                     meus_favs = df_favs_geral[df_favs_geral['Username'] == u]
                                     st.session_state.favoritos = set(meus_favs['ID_Fixture'].tolist())
