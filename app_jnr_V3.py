@@ -1,6 +1,7 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+import gspread
 import hashlib
 import requests
 from datetime import datetime
@@ -55,23 +56,71 @@ def remover_favorito(fix_id):
     cursor.execute("DELETE FROM FAVORITOS WHERE ID_Fixture = ?", (fix_id,))
     conn.commit()
     conn.close()
-    
-def atualizar_favoritos_sheets(fix_id, acao):
-    # 1. Lê a base atual de favoritos
-    df_atual = conn.read(worksheet="FAVORITOS")
-    username = st.session_state.username
 
-    if acao == "adicionar":
-        # Cria uma nova linha
-        nova_linha = pd.DataFrame([{"Username": username, "ID_Fixture": fix_id}])
-        df_atual = pd.concat([df_atual, nova_linha], ignore_index=True)
-    
-    elif acao == "remover":
-        # Remove a linha que contém o usuário AND o ID do jogo
-        df_atual = df_atual[~((df_atual['Username'] == username) & (df_atual['ID_Fixture'] == fix_id))]
+# =========================================================
+# LÓGICA DE FAVORITOS (VIA GIF HUB E GOOGLE SHEETS
+# =========================================================
 
-    # 2. Envia de volta para o Google Sheets
-    conn.update(worksheet="FAVORITOS", data=df_atual)
+def get_aba_favoritos():
+    """Acessa a aba específica de favoritos no Google Sheets"""
+    URL_SHEET = "https://docs.google.com/spreadsheets/d/1A5qGIgoCAAoCgEVX57yViEraggoKEc5QkmLoB2VvzWU/edit?usp=sharing"
+    sh = client.open_by_url(URL_SHEET)
+    return sh.worksheet("FavoritosUser")
+
+def salvar_favorito_gs(fix_id):
+    """Salva o favorito vinculado ao utilizador logado"""
+    try:
+        aba = get_aba_favoritos()
+        user = st.session_state.get('username', 'Admin') # 'Admin' como fallback
+        
+        # Verifica se já existe para não duplicar na planilha
+        dados = aba.get_all_records()
+        df_favs = pd.DataFrame(dados)
+        
+        if not df_favs.empty:
+            existe = df_favs[(df_favs['Username'] == user) & (df_favs['ID_Fixture'] == int(fix_id))]
+            if not existe.empty:
+                return # Já existe, não faz nada
+
+        aba.append_row([user, int(fix_id)])
+    except Exception as e:
+        st.error(f"Erro ao salvar favorito no Sheets: {e}")
+
+def remover_favorito_gs(fix_id):
+    """Remove a linha do favorito do utilizador logado"""
+    try:
+        aba = get_aba_favoritos()
+        user = st.session_state.get('username', 'Admin')
+        
+        dados = aba.get_all_records()
+        # Encontra a linha correta (gspread usa índice 1 e header é linha 1, então dados começam na 2)
+        for i, row in enumerate(dados, start=2):
+            if row['Username'] == user and row['ID_Fixture'] == int(fix_id):
+                aba.delete_rows(i)
+                break
+    except Exception as e:
+        st.error(f"Erro ao remover favorito no Sheets: {e}")
+
+def carregar_favoritos_gs():
+    """Lê todos os favoritos do utilizador logado para o session_state"""
+    try:
+        aba = get_aba_favoritos()
+        user = st.session_state.get('username', 'Admin')
+        
+        dados = aba.get_all_records()
+        df_favs = pd.DataFrame(dados)
+        
+        if df_favs.empty:
+            return set()
+            
+        # Filtra apenas os favoritos do user atual
+        meus_favs = df_favs[df_favs['Username'] == user]['ID_Fixture'].tolist()
+        return set(meus_favs)
+    except:
+        return set()
+
+#  FIM LÓGICA DE FAVORITOS
+# =========================================================
 
 @st.cache_data(ttl=3600)
 def carregar_stats_completas_liga(id_liga):
@@ -423,6 +472,10 @@ elif st.session_state.pagina == 'stats':
 # =========================================================
 # 3. PÁGINA JOGOS DO DIA (HOJE, AMANHÃ E FAVORITOS)
 # =========================================================
+if 'favoritos' not in st.session_state:
+    with st.spinner("Sincronizando favoritos..."):
+        st.session_state.favoritos = carregar_favoritos_gs()
+        
 elif st.session_state.pagina == 'jogos_dia':
     st.sidebar.header("Menu de Navegação")
     if st.sidebar.button("⬅️ Voltar ao Início"):
@@ -464,10 +517,10 @@ elif st.session_state.pagina == 'jogos_dia':
             # Lógica de atualização (sem abrir o expander)
             if is_favo and fix_id not in st.session_state.favoritos:
                 st.session_state.favoritos.add(fix_id)
-                # LÓGICA GOOGLE SHEETS ENTRARÁ AQUI
+                salvar_favorito_gs(fix_id) # Grava no Google
             elif not is_favo and fix_id in st.session_state.favoritos:
                 st.session_state.favoritos.remove(fix_id)
-                # LÓGICA GOOGLE SHEETS ENTRARÁ AQUI
+                remover_favorito_gs(fix_id) # Apaga do Google
 
         with col_expander:
             # TODO O SEU CONTEÚDO ORIGINAL DENTRO DESTE EXPANDER
