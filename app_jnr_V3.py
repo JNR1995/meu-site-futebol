@@ -248,25 +248,36 @@ if st.session_state.pagina == 'logon':
         if st.button("Entrar"):
             df = ler_planilha()
             
-            # Verificamos se o DataFrame foi lido e se a coluna Username existe
-            if df is not None and not df.empty and 'Username' in df.columns:
+            if not df.empty and 'Username' in df.columns:
                 # Localiza o usuário
                 user_db = df[df['Username'].astype(str) == u]
                 
                 if not user_db.empty:
-                    # Comparamos o hash da senha digitada com a salva (na coluna 'Senha')
                     senha_salva = str(user_db.iloc[0]['Senha'])
                     
                     if gerar_hash(p) == senha_salva:
-                        # Verificamos se está ativo (converte para string para garantir)
                         status_ativo = str(user_db.iloc[0]['Ativo']).upper()
                         
                         if status_ativo == "TRUE":
+                            # LOGIN COM SUCESSO - CONFIGURAR SESSÃO
                             st.session_state.logado = True
                             st.session_state.username = u
-                            # REMOVIDO: id_usuario (pois não existe na sua planilha atual)
                             st.session_state.pagina = 'home'
-                            st.rerun()
+                            
+                            # --- SINCRONIZAÇÃO DE FAVORITOS ---
+                            try:
+                                # Tenta ler a aba de favoritos usando a conexão segura
+                                df_favs_geral = conn.read(worksheet="FAVORITOS", ttl=0)
+                                if not df_favs_geral.empty and 'Username' in df_favs_geral.columns:
+                                    meus_favs = df_favs_geral[df_favs_geral['Username'] == u]
+                                    st.session_state.favoritos = set(meus_favs['ID_Fixture'].tolist())
+                                else:
+                                    st.session_state.favoritos = set()
+                            except Exception:
+                                st.session_state.favoritos = set()
+                            
+                            st.success(f"Bem-vindo, {u}!")
+                            st.rerun() 
                         else: 
                             st.error("Usuário bloqueado.")
                     else: 
@@ -274,28 +285,8 @@ if st.session_state.pagina == 'logon':
                 else: 
                     st.error("Usuário não encontrado.")
             else:
-                st.error("Erro técnico: Coluna 'Username' não encontrada na planilha ou base vazia.")
+                st.error("Erro técnico: Coluna 'Username' não encontrada ou base vazia.")
                 
-                if login_sucesso: # <--- AQUI COMEÇA O TRECHO
-                    st.session_state.username = username_digitado 
-                    st.success(f"Bem-vindo, {username_digitado}!")
-            
-                    # AGORA ENTRA A SINCRONIZAÇÃO:
-                    try:
-                        # Lemos a aba de favoritos uma única vez no login
-                        df_favs_geral = conn.read(worksheet="FAVORITOS")
-                        
-                        # Filtramos o que é SEU
-                        meus_favs = df_favs_geral[df_favs_geral['Username'] == st.session_state.username]
-                        
-                        # Guardamos na memória para a estrela brilhar nos jogos certos
-                        st.session_state.favoritos = set(meus_favs['ID_Fixture'].tolist())
-                    except Exception:
-                        # Caso a aba esteja vazia (primeiro uso), garante que não dê erro
-                        st.session_state.favoritos = set()
-                        
-                    st.rerun() # Recarrega para já mostrar os favoritos na tela
-                    
         st.write("---")
         if st.button("🆕 Cadastrar novo usuário"):
             st.session_state.pagina = 'cadastro'
