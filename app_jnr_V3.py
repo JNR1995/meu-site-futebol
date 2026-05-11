@@ -439,6 +439,10 @@ elif st.session_state.pagina == 'jogos_dia':
     def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
         fix_id = row['ID_Fixture']
 
+        # 1. Lógica da Estrela (Visual apenas por enquanto)
+        is_fav = fix_id in st.session_state.favoritos
+        icone = "★" if is_fav else "☆"
+    
         if encerrado:
             label_jogo = f"🏁 {row['Hora']} | {row['Home_Team']} {row['Gols_Home_FT']} x {row['Gols_Away_FT']} {row['Away_Team']}"
         else:
@@ -446,6 +450,24 @@ elif st.session_state.pagina == 'jogos_dia':
                 label_jogo = f"⏰ {row['Hora']} | {row['Pais']} - {row['Liga_Nome']} | {row['Home_Team']} x {row['Away_Team']}"
             else:
                 label_jogo = f"⏰ {row['Hora']} | {row['Home_Team']} x {row['Away_Team']}"
+
+        # Criamos a linha dividida: Estrela à esquerda, Expander à direita
+        col_fav_icon, col_expander = st.columns([0.4, 9.6], gap="small")
+    
+        with col_fav_icon:
+            # Este botão salva no Sheets mas NÃO abre o expander
+            if st.button(icone, key=f"fav_{fix_id}_{suffix}"):
+                if fix_id in st.session_state.favoritos:
+                    st.session_state.favoritos.remove(fix_id)
+                    # Futura função: remover_do_sheets(fix_id)
+                else:
+                    st.session_state.favoritos.add(fix_id)
+                    # Futura função: salvar_no_sheets(fix_id)
+                st.rerun()
+    
+        with col_expander:
+            # O seu expander original começa aqui
+            with st.expander(label_jogo, expanded=False):
         
         # Estilização do botão de estatísticas no final
         st.markdown("""
