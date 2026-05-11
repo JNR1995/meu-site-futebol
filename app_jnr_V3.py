@@ -559,55 +559,17 @@ elif st.session_state.pagina == 'jogos_dia':
                     col_exp1, col_exp2 = st.columns(2)
     
                     with col_exp1:
-                        # Prob. Over 2.5 Jogo
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-bottom: -6px; margin-top: -55px;'><strong>Prob. Over 2.5 Jogo %</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔎 {exp_over25_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_over25_m:.1f}%</div>
-                        """, unsafe_allow_html=True)
-
-                        # Expc Gols Jogo
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-top: -15px; margin-bottom: -6px;'><strong>Expc. Gols Jogo (Média)</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_m:.2f}</div>
-                        """, unsafe_allow_html=True)
-                            
-                        # Expc BTS Jogo
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-top: 3px; margin-bottom: -6px;'><strong>Expc. BTS Jogo %</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_m:.1f}%</div>
-                        """, unsafe_allow_html=True)
-
+                        st.markdown(f"<div style='font-size: 13px; color: #bbb; margin-top: -45px;'><strong>Prob. Over 2.5 Jogo %</strong></div><div style='font-size: 18px; font-weight: bold;'>🔎 {exp_over25_g:.1f}% | 🏠-✈️ {exp_over25_m:.1f}%</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 13px; color: #bbb;'><strong>Expc. Gols Jogo (Média)</strong></div><div style='font-size: 18px; font-weight: bold;'>⚽ {exp_gols_g:.2f} | 🏠-✈️ {exp_gols_m:.2f}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 13px; color: #bbb;'><strong>Expc. BTS Jogo %</strong></div><div style='font-size: 18px; font-weight: bold;'>🫂 {exp_bts_g:.1f}% | 🏠-✈️ {exp_bts_m:.1f}%</div>", unsafe_allow_html=True)
                     with col_exp2:
-                        # Calculando para o HT
+                        exp_05ht_g = (s_h_g.get('OVER_05_HT', 0) + s_a_g.get('OVER_05_HT', 0)) / 2
+                        exp_05ht_m = (s_h_m.get('OVER_05_HT', 0) + s_a_m.get('OVER_05_HT', 0)) / 2
                         exp_gols_ht_g = (s_h_g.get('MD_HT',0) + s_a_g.get('MD_HT',0)) / 2
-                        exp_gols_ht_m = (
-                            (s_h_m.get('MDM_HT',0) + s_a_m.get('MDS_HT',0)) / 2 + 
-                            (s_a_m.get('MDM_HT',0) + s_h_m.get('MDS_HT',0)) / 2
-                        )
-
-                        # Prob. +0.5 HT %
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-bottom: -6px; margin-top: -55px;'><strong>Prob. +0.5 HT %</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔄 {exp_05ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_05ht_m:.1f}%</div>
-                        """, unsafe_allow_html=True)
-
-                        # Expc Gols HT (MD)
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-top: -15px; margin-bottom: -6px;'><strong>Expc. Gols HT (MD)</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_ht_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_ht_m:.2f}</div>
-                        """, unsafe_allow_html=True) 
-                            
-                        # Expc BTS HT %
                         exp_bts_ht_g = (s_h_g.get('BTS_HT',0) + s_a_g.get('BTS_HT',0)) / 2
-                        exp_bts_ht_m = (s_h_m.get('BTS_HT',0) + s_a_m.get('BTS_HT',0)) / 2
-                            
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-top: 3px; margin-bottom: -6px;'><strong>Expc. BTS HT %</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_ht_m:.1f}%</div>
-                        """, unsafe_allow_html=True)
-
-                    # Fecha a div customizada
-                    st.markdown('</div>', unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 13px; color: #bbb; margin-top: -45px;'><strong>Prob. +0.5 HT %</strong></div><div style='font-size: 18px; font-weight: bold;'>🔄 {exp_05ht_g:.1f}% | 🏠-✈️ {exp_05ht_m:.1f}%</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 13px; color: #bbb;'><strong>Expc. Gols HT (MD)</strong></div><div style='font-size: 18px; font-weight: bold;'>⚽ {exp_gols_ht_g:.2f}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 13px; color: #bbb;'><strong>Expc. BTS HT %</strong></div><div style='font-size: 18px; font-weight: bold;'>🫂 {exp_bts_ht_g:.1f}%</div>", unsafe_allow_html=True)
                 else:
                     st.warning("⚠️ Estatísticas históricas não encontradas para este confronto.")
                 
