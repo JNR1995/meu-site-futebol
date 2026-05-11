@@ -435,212 +435,137 @@ elif st.session_state.pagina == 'jogos_dia':
 
     st.title("📅 Calendário de Jogos")
 
-    # --- FUNÇÃO DO CARD (ESTRELA FORA DO EXPANDER) ---
+    # --- FUNÇÃO DO CARD (ESTRELA REMOVIDA - FOCO NO EXPANDER) ---
     def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
         fix_id = row['ID_Fixture']
-        is_fav = fix_id in st.session_state.favoritos
 
         if encerrado:
             label_jogo = f"🏁 {row['Hora']} | {row['Home_Team']} {row['Gols_Home_FT']} x {row['Gols_Away_FT']} {row['Away_Team']}"
         else:
-            label_jogo = f"⏰ {row['Hora']} | {row['Home_Team']} x {row['Away_Team']}"
+            if mostrar_liga_no_label:
+                label_jogo = f"⏰ {row['Hora']} | {row['Pais']} - {row['Liga_Nome']} | {row['Home_Team']} x {row['Away_Team']}"
+            else:
+                label_jogo = f"⏰ {row['Hora']} | {row['Home_Team']} x {row['Away_Team']}"
         
+        # Estilização do botão de estatísticas no final
         st.markdown("""
             <style>
             .stButton > button {
                 background-color: transparent;
                 padding: 8px !important;
-                margin-top: 3px !important;
-            }
-            [data-testid="column"] {
-                width: min-content !important;
-                flex: unset !important;
             }
             </style>
         """, unsafe_allow_html=True)
 
-        col_fav_icon, col_expander = st.columns([0.25, 5.75])
-        
-        with col_fav_icon:
-            icone = "⭐" if fix_id in st.session_state.favoritos else "✩"
-            
-            if st.button(icone, key=f"fav_{fix_id}_{suffix}"):
-                if fix_id in st.session_state.favoritos:
-                    st.session_state.favoritos.remove(fix_id)
-                    remover_favorito(fix_id)
-                else:
-                    st.session_state.favoritos.add(fix_id)
-                    salvar_favorito(fix_id)
-                st.rerun()
+        # Agora usamos a largura total para o expander, sem a coluna do ícone
+        with st.expander(label_jogo, expanded=False):
+            c1, c2, c3 = st.columns([2.5, 1, 2.5])
+            with c1:
+                st.markdown(f"<div><span class='rank-text'>{row['Pos_Home']}º</span> <b class='team-name'>{row['Home_Team']}</b></div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='odd-box'>Casa: <b>{row['Odd_Home']:.2f}</b></div>", unsafe_allow_html=True)
+            with c2:
+                st.markdown("<div class='card-vs'>VS</div>", unsafe_allow_html=True)
+                st.markdown(f"<p style='text-align:center; color:#888; font-size: 13px;'>Empate<br><b>{row['Odd_Draw']:.2f}</b></p>", unsafe_allow_html=True)
+            with c3:
+                st.markdown(f"<div style='text-align:right;'><b class='team-name'>{row['Away_Team']}</b> <span class='rank-text'>{row['Pos_Away']}º</span></div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='odd-box'>Fora: <b>{row['Odd_Away']:.2f}</b></div>", unsafe_allow_html=True)
 
-        with col_expander:
-            if mostrar_liga_no_label:
-                label_jogo = f"⏰ {row['Hora']} | {row['Pais']} - {row['Liga_Nome']} | {row['Home_Team']} x {row['Away_Team']}"
-            else:
-                label_jogo = f"⏰ {row['Hora']} | {row['Home_Team']} x {row['Away_Team']}"
-            
-            with st.expander(label_jogo, expanded=False):
-                c1, c2, c3 = st.columns([2.5, 1, 2.5])
-                with c1:
-                    st.markdown(f"<div><span class='rank-text'>{row['Pos_Home']}º</span> <b class='team-name'>{row['Home_Team']}</b></div>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='odd-box'>Casa: <b>{row['Odd_Home']:.2f}</b></div>", unsafe_allow_html=True)
-                with c2:
-                    st.markdown("<div class='card-vs'>VS</div>", unsafe_allow_html=True)
-                    st.markdown(f"<p style='text-align:center; color:#888; font-size: 13px;'>Empate<br><b>{row['Odd_Draw']:.2f}</b></p>", unsafe_allow_html=True)
-                with c3:
-                    st.markdown(f"<div style='text-align:right;'><b class='team-name'>{row['Away_Team']}</b> <span class='rank-text'>{row['Pos_Away']}º</span></div>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='odd-box'>Fora: <b>{row['Odd_Away']:.2f}</b></div>", unsafe_allow_html=True)
+            st.divider()
 
-                st.divider()
+            data_h = buscar_stats_duplas(row['ID_Liga'], row['Home_Team'], 'CASA')
+            data_a = buscar_stats_duplas(row['ID_Liga'], row['Away_Team'], 'FORA')
 
-                data_h = buscar_stats_duplas(row['ID_Liga'], row['Home_Team'], 'CASA')
-                data_a = buscar_stats_duplas(row['ID_Liga'], row['Away_Team'], 'FORA')
+            if data_h and data_a:
+                s_h_g, s_h_m = data_h["geral"], data_h["mando"]
+                s_a_g, s_a_m = data_a["geral"], data_a["mando"]
 
-                if data_h and data_a:
-                    s_h_g, s_h_m = data_h["geral"], data_h["mando"]
-                    s_a_g, s_a_m = data_a["geral"], data_a["mando"]
+                st.markdown("<style>table { width: 100% !important; table-layout: fixed; margin-top: -24px !important; }</style>", unsafe_allow_html=True)
 
-                    st.markdown("""
-                        <style>
-                        table {
-                            margin-top: -24px !important;
-                            width: 100%;
-                        }
-                        </style>
-                        """, unsafe_allow_html=True)
+                st.markdown("<h5 style='text-align: center; font-size: 18px; margin-top: -52px; margin-bottom: -10px;'>📊 Média de Gols Por Jogo</h5>", unsafe_allow_html=True)
+                c_esp1, c1, c_vazio, c2, c_esp2 = st.columns([1, 8, 0.5, 8, 1])
 
-                    st.markdown("<style>table { width: 100% !important; table-layout: fixed; }</style>", unsafe_allow_html=True)
+                with c1: 
+                    st.markdown(f"""
+                    | Métrica (GERAL) | {row['Home_Team']} | {row['Away_Team']} |
+                    | :--- | :---: | :---: |
+                    | Gols Marcados | {s_h_g.get('MDM',0):.2f} | {s_a_g.get('MDM',0):.2f} |
+                    | Gols Sofridos | {s_h_g.get('MDS',0):.2f} | {s_a_g.get('MDS',0):.2f} |
+                    | Média Total | {s_h_g.get('MD',0):.2f} | {s_a_g.get('MD',0):.2f} |
+                    | BTS | {s_h_g.get('BTS',0):.0f}% | {s_a_g.get('BTS',0):.0f}% |
+                    | Clean Sheet | {s_h_g.get('CS',0):.0f}% | {s_a_g.get('CS',0):.0f}% |
+                    """)
 
-                    st.markdown("<h5 style='text-align: center; font-size: 18px; margin-top: -52px; margin-bottom: -10px;'>📊 Média de Gols Por Jogo</h5>", unsafe_allow_html=True)
-                    c_esp1, c1, c_vazio, c2, c_esp2 = st.columns([1, 8, 0.5, 8, 1])
+                with c2: 
+                    st.markdown(f"""
+                    | Métrica (CASA/FORA) | {row['Home_Team']} (C) | {row['Away_Team']} (F) |
+                    | :--- | :---: | :---: |
+                    | Gols Marcados | **{s_h_m.get('MDM',0):.2f}** | **{s_a_m.get('MDM',0):.2f}** |
+                    | Gols Sofridos | **{s_h_m.get('MDS',0):.2f}** | **{s_a_m.get('MDS',0):.2f}** |
+                    | Média Total | **{s_h_m.get('MD',0):.2f}** | **{s_a_m.get('MD',0):.2f}** |
+                    | BTS | **{s_h_m.get('BTS',0):.0f}%** | **{s_a_m.get('BTS',0):.0f}%** |
+                    | Clean Sheet | **{s_h_m.get('CS',0):.0f}%** | **{s_a_m.get('CS',0):.0f}%** |
+                    """)
 
-                    with c1: 
-                        st.markdown(f"""
-                        | Métrica (GERAL) | {row['Home_Team']} | {row['Away_Team']} |
-                        | :--- | :---: | :---: |
-                        | Gols Marcados | {s_h_g.get('MDM',0):.2f} | {s_a_g.get('MDM',0):.2f} |
-                        | Gols Sofridos | {s_h_g.get('MDS',0):.2f} | {s_a_g.get('MDS',0):.2f} |
-                        | Média Total | {s_h_g.get('MD',0):.2f} | {s_a_g.get('MD',0):.2f} |
-                        | BTS | {s_h_g.get('BTS',0):.0f}% | {s_a_g.get('BTS',0):.0f}% |
-                        | Clean Sheet | {s_h_g.get('CS',0):.0f}% | {s_a_g.get('CS',0):.0f}% |
-                        """)
-
-                    with c2: 
-                        st.markdown(f"""
-                        | Métrica (CASA/FORA) | {row['Home_Team']} (C) | {row['Away_Team']} (F) |
-                        | :--- | :---: | :---: |
-                        | Gols Marcados | **{s_h_m.get('MDM',0):.2f}** | **{s_a_m.get('MDM',0):.2f}** |
-                        | Gols Sofridos | **{s_h_m.get('MDS',0):.2f}** | **{s_a_m.get('MDS',0):.2f}** |
-                        | Média Total | **{s_h_m.get('MD',0):.2f}** | **{s_a_m.get('MD',0):.2f}** |
-                        | BTS | **{s_h_m.get('BTS',0):.0f}%** | **{s_a_m.get('BTS',0):.0f}%** |
-                        | Clean Sheet | **{s_h_m.get('CS',0):.0f}%** | **{s_a_m.get('CS',0):.0f}%** |
-                        """)
-
-                    st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 14px; margin-top: -10px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
-                    c_esp3, c3, c_vazio2, c4, c_esp4 = st.columns([1, 8, 0.5, 8, 1])
-                    
-                    with c3:
-                        st.markdown(f"""
-                        | Métrica (GERAL) | {row['Home_Team']} | {row['Away_Team']} |
-                        | :--- | :---: | :---: |
-                        | Gols Marcados | {s_h_g.get('MDM_HT',0):.2f} | {s_a_g.get('MDM_HT',0):.2f} |
-                        | Gols Sofridos | {s_h_g.get('MDS_HT',0):.2f} | {s_a_g.get('MDS_HT',0):.2f} |
-                        | Média Total | {s_h_g.get('MD_HT',0):.2f} | {s_a_g.get('MD_HT',0):.2f} |
-                        | +0.5 HT | {s_h_g.get('OVER_05_HT',0):.0f}% | {s_a_g.get('OVER_05_HT',0):.0f}% |
-                        | BTS HT | {s_h_g.get('BTS_HT',0):.0f}% | {s_a_g.get('BTS_HT',0):.0f}% |
-                        | CS HT | {s_h_g.get('CS_HT',0):.0f}% | {s_a_g.get('CS_HT',0):.0f}% |
-                        """)
-
-                    with c4:
-                        st.markdown(f"""
-                        | Métrica (CASA/FORA) | {row['Home_Team']} (C) | {row['Away_Team']} (F) |
-                        | :--- | :---: | :---: |
-                        | Gols Marcados | **{s_h_m.get('MDM_HT',0):.2f}** | **{s_a_m.get('MDM_HT',0):.2f}** |
-                        | Gols Sofridos | **{s_h_m.get('MDS_HT',0):.2f}** | **{s_a_m.get('MDS_HT',0):.2f}** |
-                        | Média Total | **{s_h_m.get('MD_HT',0):.2f}** | **{s_a_m.get('MD_HT',0):.2f}** |
-                        | +0.5 HT | **{s_h_m.get('OVER_05_HT',0):.0f}%** | **{s_a_m.get('OVER_05_HT',0):.0f}%** |
-                        | BTS HT | **{s_h_m.get('BTS_HT',0):.0f}%** | **{s_a_m.get('BTS_HT',0):.0f}%** |
-                        | CS HT | **{s_h_m.get('CS_HT',0):.0f}%** | **{s_a_m.get('CS_HT',0):.0f}%** |
-                        """)
-
-                    st.markdown("<br>", unsafe_allow_html=True)
-
-                    exp_gols_g = (s_h_g.get('MD',0) + s_a_g.get('MD',0)) / 2
-                    exp_bts_g = (s_h_g.get('BTS',0) + s_a_g.get('BTS',0)) / 2
-                    exp_05ht_g = (s_h_g.get('OVER_05_HT', 0) + s_a_g.get('OVER_05_HT', 0)) / 2
-                    exp_over25_g = (s_h_g.get('OVER_25_FT', 0) + s_a_g.get('OVER_25_FT', 0)) / 2
-
-                    exp_gols_m = (
-                        (s_h_m.get('MDM',0) + s_a_m.get('MDS',0)) / 2 + 
-                        (s_a_m.get('MDM',0) + s_h_m.get('MDS',0)) / 2
-                    )
-                    exp_bts_m = (s_h_m.get('BTS',0) + s_a_m.get('BTS',0)) / 2
-                    exp_05ht_m = (s_h_m.get('OVER_05_HT', 0) + s_a_m.get('OVER_05_HT', 0)) / 2
-                    exp_over25_m = (s_h_m.get('OVER_25_FT', 0) + s_a_m.get('OVER_25_FT', 0)) / 2
-
-                    st.markdown("---")
-                    st.markdown("""
-                        <style>
-                        .container-expectativas {
-                            margin-top: 20px !important;
-                        }
-                        </style>
-                    """, unsafe_allow_html=True)
-
-                    st.markdown('<div class="container-expectativas">', unsafe_allow_html=True)
-                    col_exp1, col_exp2 = st.columns(2)
-
-                    with col_exp1:
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-bottom: -6px; margin-top: -55px;'><strong>Prob. Over 2.5 Jogo %</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔎 {exp_over25_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_over25_m:.1f}%</div>
-                        """, unsafe_allow_html=True)
-
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-top: -15px; margin-bottom: -6px;'><strong>Expc. Gols Jogo (Média)</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_m:.2f}</div>
-                        """, unsafe_allow_html=True)
-                            
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-top: 3px; margin-bottom: -6px;'><strong>Expc. BTS Jogo %</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_m:.1f}%</div>
-                        """, unsafe_allow_html=True)
-
-                    with col_exp2:
-                        exp_gols_ht_g = (s_h_g.get('MD_HT',0) + s_a_g.get('MD_HT',0)) / 2
-                        exp_gols_ht_m = (
-                            (s_h_m.get('MDM_HT',0) + s_a_m.get('MDS_HT',0)) / 2 + 
-                            (s_a_m.get('MDM_HT',0) + s_h_m.get('MDS_HT',0)) / 2
-                        )
-
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-bottom: -6px; margin-top: -55px;'><strong>Prob. +0.5 HT %</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔄 {exp_05ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_05ht_m:.1f}%</div>
-                        """, unsafe_allow_html=True)
-
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-top: -15px; margin-bottom: -6px;'><strong>Expc. Gols HT (MD)</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_ht_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_ht_m:.2f}</div>
-                        """, unsafe_allow_html=True) 
-                            
-                        exp_bts_ht_g = (s_h_g.get('BTS_HT',0) + s_a_g.get('BTS_HT',0)) / 2
-                        exp_bts_ht_m = (s_h_m.get('BTS_HT',0) + s_a_m.get('BTS_HT',0)) / 2
-                            
-                        st.markdown(f"""
-                            <div style='font-size: 13px; color: #bbb; margin-top: 3px; margin-bottom: -6px;'><strong>Expc. BTS HT %</strong></div>
-                            <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_ht_m:.1f}%</div>
-                        """, unsafe_allow_html=True)
-
-                    st.markdown('</div>', unsafe_allow_html=True)
-                 
-                else:
-                    st.warning("⚠️ Estatísticas históricas não encontradas para este confronto.")
+                st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 14px; margin-top: -10px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
+                c_esp3, c3, c_vazio2, c4, c_esp4 = st.columns([1, 8, 0.5, 8, 1])
                 
-                if st.button(f"🔍 Go to league statistics", key=f"btn_{fix_id}_{suffix}"):
-                    st.session_state.pais_nav = row['Pais']
-                    st.session_state.liga_nav = row['Liga_Nome']
-                    st.session_state.pagina = 'stats'
-                    st.rerun()
+                with c3:
+                    st.markdown(f"""
+                    | Métrica (GERAL) | {row['Home_Team']} | {row['Away_Team']} |
+                    | :--- | :---: | :---: |
+                    | Gols Marcados | {s_h_g.get('MDM_HT',0):.2f} | {s_a_g.get('MDM_HT',0):.2f} |
+                    | Gols Sofridos | {s_h_g.get('MDS_HT',0):.2f} | {s_a_g.get('MDS_HT',0):.2f} |
+                    | Média Total | {s_h_g.get('MD_HT',0):.2f} | {s_a_g.get('MD_HT',0):.2f} |
+                    | +0.5 HT | {s_h_g.get('OVER_05_HT',0):.0f}% | {s_a_g.get('OVER_05_HT',0):.0f}% |
+                    | BTS HT | {s_h_g.get('BTS_HT',0):.0f}% | {s_a_g.get('BTS_HT',0):.0f}% |
+                    | CS HT | {s_h_g.get('CS_HT',0):.0f}% | {s_a_g.get('CS_HT',0):.0f}% |
+                    """)
+
+                with c4:
+                    st.markdown(f"""
+                    | Métrica (CASA/FORA) | {row['Home_Team']} (C) | {row['Away_Team']} (F) |
+                    | :--- | :---: | :---: |
+                    | Gols Marcados | **{s_h_m.get('MDM_HT',0):.2f}** | **{s_a_m.get('MDM_HT',0):.2f}** |
+                    | Gols Sofridos | **{s_h_m.get('MDS_HT',0):.2f}** | **{s_a_m.get('MDS_HT',0):.2f}** |
+                    | Média Total | **{s_h_m.get('MD_HT',0):.2f}** | **{s_a_m.get('MD_HT',0):.2f}** |
+                    | +0.5 HT | **{s_h_m.get('OVER_05_HT',0):.0f}%** | **{s_a_m.get('OVER_05_HT',0):.0f}%** |
+                    | BTS HT | **{s_h_m.get('BTS_HT',0):.0f}%** | **{s_a_m.get('BTS_HT',0):.0f}%** |
+                    | CS HT | **{s_h_m.get('CS_HT',0):.0f}%** | **{s_a_m.get('CS_HT',0):.0f}%** |
+                    """)
+
+                # Cálculos de Expectativa
+                exp_over25_g = (s_h_g.get('OVER_25_FT', 0) + s_a_g.get('OVER_25_FT', 0)) / 2
+                exp_over25_m = (s_h_m.get('OVER_25_FT', 0) + s_a_m.get('OVER_25_FT', 0)) / 2
+                exp_gols_g = (s_h_g.get('MD',0) + s_a_g.get('MD',0)) / 2
+                exp_gols_m = ((s_h_m.get('MDM',0) + s_a_m.get('MDS',0))/2 + (s_a_m.get('MDM',0) + s_h_m.get('MDS',0))/2)
+                exp_bts_g = (s_h_g.get('BTS',0) + s_a_g.get('BTS',0)) / 2
+                exp_bts_m = (s_h_m.get('BTS',0) + s_a_m.get('BTS',0)) / 2
+
+                st.markdown("---")
+                col_exp1, col_exp2 = st.columns(2)
+
+                with col_exp1:
+                    st.markdown(f"<div style='font-size: 13px; color: #bbb; margin-top: -45px;'><strong>Prob. Over 2.5 Jogo %</strong></div><div style='font-size: 18px; font-weight: bold;'>🔎 {exp_over25_g:.1f}% | 🏠-✈️ {exp_over25_m:.1f}%</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='font-size: 13px; color: #bbb;'><strong>Expc. Gols Jogo (Média)</strong></div><div style='font-size: 18px; font-weight: bold;'>⚽ {exp_gols_g:.2f} | 🏠-✈️ {exp_gols_m:.2f}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='font-size: 13px; color: #bbb;'><strong>Expc. BTS Jogo %</strong></div><div style='font-size: 18px; font-weight: bold;'>🫂 {exp_bts_g:.1f}% | 🏠-✈️ {exp_bts_m:.1f}%</div>", unsafe_allow_html=True)
+
+                with col_exp2:
+                    exp_05ht_g = (s_h_g.get('OVER_05_HT', 0) + s_a_g.get('OVER_05_HT', 0)) / 2
+                    exp_05ht_m = (s_h_m.get('OVER_05_HT', 0) + s_a_m.get('OVER_05_HT', 0)) / 2
+                    exp_gols_ht_g = (s_h_g.get('MD_HT',0) + s_a_g.get('MD_HT',0)) / 2
+                    exp_bts_ht_g = (s_h_g.get('BTS_HT',0) + s_a_g.get('BTS_HT',0)) / 2
+
+                    st.markdown(f"<div style='font-size: 13px; color: #bbb; margin-top: -45px;'><strong>Prob. +0.5 HT %</strong></div><div style='font-size: 18px; font-weight: bold;'>🔄 {exp_05ht_g:.1f}% | 🏠-✈️ {exp_05ht_m:.1f}%</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='font-size: 13px; color: #bbb;'><strong>Expc. Gols HT (MD)</strong></div><div style='font-size: 18px; font-weight: bold;'>⚽ {exp_gols_ht_g:.2f}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='font-size: 13px; color: #bbb;'><strong>Expc. BTS HT %</strong></div><div style='font-size: 18px; font-weight: bold;'>🫂 {exp_bts_ht_g:.1f}%</div>", unsafe_allow_html=True)
+            else:
+                st.warning("⚠️ Estatísticas históricas não encontradas para este confronto.")
+            
+            if st.button(f"🔍 Go to league statistics", key=f"btn_{fix_id}_{suffix}"):
+                st.session_state.pais_nav = row['Pais']
+                st.session_state.liga_nav = row['Liga_Nome']
+                st.session_state.pagina = 'stats'
+                st.rerun()
 
     # --- FUNÇÃO DE RENDERIZAÇÃO DA LISTA ---
     def renderizar_lista_jogos(tabela_nome, df_custom=None):
@@ -682,7 +607,7 @@ elif st.session_state.pagina == 'jogos_dia':
         else:
             st.info("Nenhum jogo encontrado para este filtro.")
 
-    # --- ABAS (Aba Encerrados Removida) ---
+    # --- ABAS ---
     tab_hoje, tab_amanha, tab_fav = st.tabs(["⚽ Jogos de Hoje", "🔜 Amanhã", "⭐ Salvos"])
 
     with tab_hoje:
@@ -705,12 +630,8 @@ elif st.session_state.pagina == 'jogos_dia':
                     st.toast("Lista esvaziada com sucesso!")
                     st.rerun()
 
-        df_hoje_fav = carregar_dados('''
-            SELECT J.*, L.Pais, 'HOJE' as Origem FROM JOGOS_HOJE J JOIN LIGAS L ON J.ID_Liga = L.ID_Liga
-        ''')
-        df_amanha_fav = carregar_dados('''
-            SELECT J.*, L.Pais, 'AMANHÃ' as Origem FROM JOGOS_AMANHA J JOIN LIGAS L ON J.ID_Liga = L.ID_Liga
-        ''')
+        df_hoje_fav = carregar_dados("SELECT J.*, L.Pais, 'HOJE' as Origem FROM JOGOS_HOJE J JOIN LIGAS L ON J.ID_Liga = L.ID_Liga")
+        df_amanha_fav = carregar_dados("SELECT J.*, L.Pais, 'AMANHÃ' as Origem FROM JOGOS_AMANHA J JOIN LIGAS L ON J.ID_Liga = L.ID_Liga")
         
         df_all = pd.concat([df_hoje_fav, df_amanha_fav], ignore_index=True)
         df_fav_list = df_all[df_all['ID_Fixture'].isin(st.session_state.favoritos)]
