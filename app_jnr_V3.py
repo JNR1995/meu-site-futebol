@@ -60,52 +60,49 @@ def remover_favorito(fix_id):
 # =========================================================
 # LÓGICA DE FAVORITOS (SIMPLIFICADA VIA st.connection)
 # =========================================================
-
 def carregar_favoritos_gs():
-    """Lê favoritos da aba FavoritosUser usando a conexão nativa"""
+    """Lê favoritos da aba FavoritosUser"""
     try:
-        # Lê a aba específica
-        df_favs = conn.read(worksheet="FavoritosUser")
+        # Tenta ler a aba específica. Se der erro 400, a aba pode não existir.
+        df_favs = conn.read(worksheet="FavoritosUser", ttl=0) 
         user = st.session_state.get('username', 'Admin')
         
         if df_favs.empty:
             return set()
             
-        # Filtra os favoritos do usuário logado
         meus_favs = df_favs[df_favs['Username'] == user]['ID_Fixture'].tolist()
         return set(meus_favs)
-    except Exception as e:
-        # Se a aba estiver vazia ou não existir, retorna set vazio
+    except:
         return set()
 
 def salvar_favorito_gs(fix_id):
-    """Adiciona uma linha na planilha"""
+    """Adiciona o ID na planilha"""
     try:
         user = st.session_state.get('username', 'Admin')
-        # Busca os dados atuais para atualizar
-        df_atual = conn.read(worksheet="FavoritosUser")
-        
-        # Cria a nova linha
+        # Tenta ler o que já existe
+        try:
+            df_atual = conn.read(worksheet="FavoritosUser", ttl=0)
+        except:
+            df_atual = pd.DataFrame(columns=["Username", "ID_Fixture"])
+            
         nova_linha = pd.DataFrame([{"Username": user, "ID_Fixture": int(fix_id)}])
+        df_final = pd.concat([df_atual, nova_linha], ignore_index=True).drop_duplicates()
         
-        # Junta com o que já existe e remove duplicados
-        df_novo = pd.concat([df_atual, nova_linha], ignore_index=True).drop_duplicates()
-        
-        # Atualiza a planilha (sobrescreve com a lista nova)
-        conn.update(worksheet="FavoritosUser", data=df_novo)
+        # O segredo: usamos o update para renovar a aba inteira
+        conn.update(worksheet="FavoritosUser", data=df_final)
     except Exception as e:
         st.error(f"Erro ao salvar: {e}")
 
 def remover_favorito_gs(fix_id):
-    """Remove a linha da planilha"""
+    """Remove o ID da planilha"""
     try:
         user = st.session_state.get('username', 'Admin')
-        df_atual = conn.read(worksheet="FavoritosUser")
+        df_atual = conn.read(worksheet="FavoritosUser", ttl=0)
         
         if not df_atual.empty:
-            # Mantém apenas o que NÃO é o id que queremos remover
-            df_filtrado = df_atual[~((df_atual['Username'] == user) & (df_atual['ID_Fixture'] == int(fix_id)))]
-            conn.update(worksheet="FavoritosUser", data=df_filtrado)
+            # Filtra para remover a linha específica
+            df_final = df_atual[~((df_atual['Username'] == user) & (df_atual['ID_Fixture'] == int(fix_id)))]
+            conn.update(worksheet="FavoritosUser", data=df_final)
     except Exception as e:
         st.error(f"Erro ao remover: {e}")
         
