@@ -391,7 +391,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     """, unsafe_allow_html=True)
 
     # Saudação discreta no topo
-    st.markdown(f"<p style='text-align:right; color:#FFFFF;'>Olá: <b>{st.session_state.username}</b></p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:right; color:#FFFFFF;'>Logado como: <b>{st.session_state.username}</b></p>", unsafe_allow_html=True)
 
     # Cabeçalho Centralizado
     st.markdown('<div class="main-title"><span style="color:#888;">📊 FutebolStats</span><span style="color:#00FF7F;">Jnr</span></div>', unsafe_allow_html=True)
