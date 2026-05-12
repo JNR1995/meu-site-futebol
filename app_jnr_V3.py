@@ -369,7 +369,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         
         /* Ajuste do Título e Subtítulo */
         .main-title {
-            font-size: 85px !important;
+            font-size: 125px !important;
             text-align: center;
             font-weight: bold;
             line-height: 1.2;
