@@ -189,8 +189,8 @@ st.markdown("""
     .parte-verde { color: #00FF7F; text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.3); }
     .sub-title { font-family: "Saira Stencil", sans-serif; font-size: 26px !important; font-weight: 300; color: #AAAAAA; text-align: center; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; }
     
-    .liga-header { text-align: center; background-color: #1E1E1E; color: #FFFFFF; padding: 4px; font-weight: bold; font-size: 22px; border-radius: 8px; margin-top: 50px; border: 1px solid #333; margin-bottom: -12.5px !important; }
-    .stExpander { margin-bottom: -11px !important; border-radius: 5px !important; }
+    .liga-header { text-align: center; background-color: #1E1E1E; color: #FFFFFF; padding: 4px; font-weight: bold; font-size: 22px; border-radius: 8px; margin-top: 5px; border: 1px solid #333; margin-bottom: -12.5px !important; }
+    .stExpander { margin-bottom: -11px !important; border-radius: 50px !important; }
     
     div.stButton > button { background-color: #1E1E1E; color: white; border-radius: 6px; border: 2px solid #333; height: 3.5em; width: 100%; font-family: 'Montserrat', sans-serif; font-weight: bold; transition: 0.3s; }
     div.stButton > button:hover { border: 1px solid #00FF7F; color: #00FF7F; background-color: #1E1E1E; box-shadow: 0px 10px 15px rgba(0, 255, 127, 0.2); }
