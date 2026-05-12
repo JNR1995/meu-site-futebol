@@ -666,7 +666,7 @@ elif st.session_state.pagina == 'jogos_dia':
                             st.markdown("""
                                 <style>
                                 .container-expectativas {
-                                    margin-top: 10px !important;  /* Ajuste este valor para subir mais ou menos */
+                                    margin-top: -10px !important;  /* Ajuste este valor para subir mais ou menos */
                                 }
                                 </style>
                             """, unsafe_allow_html=True)
