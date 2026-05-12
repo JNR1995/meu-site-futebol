@@ -181,6 +181,9 @@ if 'pagina' not in st.session_state: st.session_state.pagina = 'logon'
 if 'logado' not in st.session_state: st.session_state.logado = False
 if 'user_id' not in st.session_state: st.session_state.user_id = None
 if 'username' not in st.session_state: st.session_state.username = None
+if 'pais_nav' not in st.session_state: st.session_state.pais_nav = None
+if 'liga_nav' not in st.session_state: st.session_state.liga_nav = None
+if 'time_nav' not in st.session_state: st.session_state.time_nav = None
 
 # --- ESTILIZAÇÃO CSS COMPLETA (MANTIDA 100%) ---
 st.markdown("""
@@ -385,16 +388,23 @@ elif st.session_state.pagina == 'stats':
 
     if not df_menu.empty:
         lista_paises = sorted(df_menu['Pais'].unique().tolist())
+        
+        # 1. Escolha o País
         idx_p = lista_paises.index(st.session_state.pais_nav) if st.session_state.pais_nav in lista_paises else 0
         pais_sel = st.sidebar.selectbox("1. Escolha o País:", lista_paises, index=idx_p)
+        st.session_state.pais_nav = pais_sel # Salva a escolha
         
         df_ligas_f = df_menu[df_menu['Pais'] == pais_sel]
         lista_ligas = df_ligas_f['Liga'].tolist()
+        
+        # 2. Escolha a Competição
         idx_l = lista_ligas.index(st.session_state.liga_nav) if st.session_state.liga_nav in lista_ligas else 0
         liga_sel = st.sidebar.selectbox("2. Escolha a Competição:", lista_ligas, index=idx_l)
+        st.session_state.liga_nav = liga_sel # Salva a escolha
         
+        # 3. Localizar Time
         busca_time = st.sidebar.text_input("🔍 Localizar Time:", value=st.session_state.time_nav if st.session_state.time_nav else "")
-        id_final = df_ligas_f[df_ligas_f['Liga'] == liga_sel]['ID_Liga'].values[0]
+        st.session_state.time_nav = busca_time # Salva a busca
 
         st.title(f"📊 {pais_sel}: {liga_sel}")
         data_att, classe_data = buscar_data_atualizacao(id_final)
@@ -415,14 +425,21 @@ elif st.session_state.pagina == 'stats':
             st.subheader(f"🏠 Home")
             df_c = carregar_dados(f"SELECT {colunas_sql} FROM {tabela_base}_CASA WHERE ID_Liga = {id_final}")
             if busca_time: df_c = df_c[df_c['Equipe'].str.contains(busca_time, case=False)]
-            st.dataframe(df_c.style.format({c: "{:.1f}%" for c in colunas_perc}, precision=2), use_container_width=True, hide_index=True)
+            st.dataframe(
+                df.style.format({c: "{:.1f}%" for c in colunas_perc}, precision=2, na_rep="0.0%"), 
+                use_container_width=True, 
+                hide_index=True
+            )
 
             # 3. Fora
             st.subheader(f"✈️ Away")
             df_f = carregar_dados(f"SELECT {colunas_sql} FROM {tabela_base}_FORA WHERE ID_Liga = {id_final}")
             if busca_time: df_f = df_f[df_f['Equipe'].str.contains(busca_time, case=False)]
-            st.dataframe(df_f.style.format({c: "{:.1f}%" for c in colunas_perc}, precision=2), use_container_width=True, hide_index=True)
-
+            st.dataframe(
+                df.style.format({c: "{:.1f}%" for c in colunas_perc}, precision=2, na_rep="0.0%"), 
+                use_container_width=True, 
+                hide_index=True
+            )
         # --- APLICAÇÃO NAS TABS ---
         with tab1:
             cols_ft = 'Equipe, Jogos, MDM, MDS, MD, "0.5+", "1.5+", "2.5+", "3.5+", "4.5+", BTS, CS'
