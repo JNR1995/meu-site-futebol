@@ -216,16 +216,15 @@ st.markdown("""
 # --- FUNÇÃO PARA LER PLANILHA SEM ERRO HTTP ---
 def ler_planilha():
     try:
-        # Usa a conexão oficial que você já configurou com a Conta de Serviço
-        # 'usuarios' é o nome da aba que vi na sua imagem
         df = conn.read(worksheet="usuarios", ttl=0)
+        if df is None or df.empty:
+            return pd.DataFrame()
         
-        # Limpeza de colunas
         df.columns = [str(c).strip() for c in df.columns]
-        
         return df
     except Exception as e:
-        st.error(f"Erro ao ler banco de dados via GSheets: {e}")
+        # Exibe uma mensagem clara para o usuário em vez de um erro de Python
+        st.error("🏠 Erro de conexão com o banco de dados. Por favor, tente novamente em alguns segundos.")
         return pd.DataFrame()
         
 # --- TELA DE LOGON ---
@@ -260,14 +259,15 @@ if st.session_state.pagina == 'logon':
                             
                             # --- SINCRONIZAÇÃO DE FAVORITOS ---
                             try:
-                                # Tenta ler a aba de favoritos usando a conexão segura
                                 df_favs_geral = conn.read(worksheet="FavoritosUser", ttl=0)
                                 if not df_favs_geral.empty and 'Username' in df_favs_geral.columns:
                                     meus_favs = df_favs_geral[df_favs_geral['Username'] == u]
                                     st.session_state.favoritos = set(meus_favs['ID_Fixture'].tolist())
                                 else:
                                     st.session_state.favoritos = set()
-                            except Exception:
+                            except Exception as e:
+                                # O st.toast aparece como uma notificação discreta no canto da tela
+                                st.toast("⚠️ Nota: Não foi possível carregar seus favoritos agora, mas o app funcionará normalmente.", icon="☁️")
                                 st.session_state.favoritos = set()
                             
                             st.success(f"Bem-vindo, {u}!")
