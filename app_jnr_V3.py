@@ -661,24 +661,28 @@ elif st.session_state.pagina == 'jogos_dia':
                             exp_05ht_g = (s_h_g.get('OVER_05_HT', 0) + s_a_g.get('OVER_05_HT', 0)) / 2
         
                             # --- EXIBIÇÃO NO CARD ---
+                            # Envolvemos a linha em um container para poder subir ela também
+                            st.markdown("<div style='margin-top: -30px;'>", unsafe_allow_html=True)
                             st.markdown("---")
-                            # Injeta um estilo específico para o container das colunas de expectativa
+                            st.markdown("</div>", unsafe_allow_html=True)
+                            
+                            # Injeta um estilo específico para o container das colunas
                             st.markdown("""
                                 <style>
                                 .container-expectativas {
-                                    margin-top: -35px !important;  /* Ajuste este valor para subir mais ou menos */
+                                    margin-top: -45px !important;  /* Aumentei o negativo para subir mais o bloco todo */
                                 }
                                 </style>
                             """, unsafe_allow_html=True)
-        
-                            # Abre a div customizada antes das colunas
+                            
+                            # Abre a div customizada
                             st.markdown('<div class="container-expectativas">', unsafe_allow_html=True)
                             
                             col_exp1, col_exp2 = st.columns(2)
         
                             with col_exp1:
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -6px; margin-top: -155px;'><strong>Prob. Over 2.5 Jogo %</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -6px; margin-top: -55px;'><strong>Prob. Over 2.5 Jogo %</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔎 {exp_over25_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_over25_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
         
