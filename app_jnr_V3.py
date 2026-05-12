@@ -661,12 +661,12 @@ elif st.session_state.pagina == 'jogos_dia':
                             exp_05ht_g = (s_h_g.get('OVER_05_HT', 0) + s_a_g.get('OVER_05_HT', 0)) / 2
         
                             # --- EXIBIÇÃO NO CARD ---
-                            st.markdown("---")st.markdown("<div style='margin-top: -25px;'>", unsafe_allow_html=True)
+                            st.markdown("---")
                             # Injeta um estilo específico para o container das colunas de expectativa
                             st.markdown("""
                                 <style>
                                 .container-expectativas {
-                                    margin-top: -10px !important;  /* Ajuste este valor para subir mais ou menos */
+                                    margin-top: -35px !important;  /* Ajuste este valor para subir mais ou menos */
                                 }
                                 </style>
                             """, unsafe_allow_html=True)
