@@ -662,7 +662,7 @@ elif st.session_state.pagina == 'jogos_dia':
         
                             # --- EXIBIÇÃO NO CARD ---
                             # Envolvemos a linha em um container para poder subir ela também
-                            st.markdown("<div style='margin-top: -30px;'>", unsafe_allow_html=True)
+                            st.markdown("<div style='margin-top: -130px;'>", unsafe_allow_html=True)
                             st.markdown("---")
                             st.markdown("</div>", unsafe_allow_html=True)
                             
@@ -670,7 +670,7 @@ elif st.session_state.pagina == 'jogos_dia':
                             st.markdown("""
                                 <style>
                                 .container-expectativas {
-                                    margin-top: -45px !important;  /* Aumentei o negativo para subir mais o bloco todo */
+                                    margin-top: -145px !important;  /* Aumentei o negativo para subir mais o bloco todo */
                                 }
                                 </style>
                             """, unsafe_allow_html=True)
