@@ -353,7 +353,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         <style>
         /* Estilo para garantir que todos os botões tenham a mesma altura e design */
         div.stButton > button {
-            width: 75%;
+            width: 100%;
             height: 25px; /* Altura fixa para todos */
             border-radius: 10px;
             border: 1px solid #333;
@@ -376,7 +376,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         
         /* Ajuste do Título e Subtítulo */
         .main-title {
-            font-size: 60px !important;
+            font-size: 70px !important;
             text-align: center;
             font-weight: bold;
             line-height: 1.2;
@@ -391,7 +391,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     """, unsafe_allow_html=True)
 
     # Saudação discreta no topo
-    st.markdown(f"<p style='text-align:right; color:#00000;'>Olá: <b>{st.session_state.username}</b></p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:right; color:#0000;'>Olá: <b>{st.session_state.username}</b></p>", unsafe_allow_html=True)
 
     # Cabeçalho Centralizado
     st.markdown('<div class="main-title"><span style="color:#888;">📊 FutebolStats</span><span style="color:#00FF7F;">Jnr</span></div>', unsafe_allow_html=True)
