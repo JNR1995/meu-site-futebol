@@ -662,7 +662,7 @@ elif st.session_state.pagina == 'jogos_dia':
         
                             # --- EXIBIÇÃO NO CARD ---
                             # Envolvemos a linha em um container para poder subir ela também
-                            st.markdown("<div style='margin-top: -35px;'>", unsafe_allow_html=True)
+                            st.markdown("<div style='margin-top: -75px;'>", unsafe_allow_html=True)
                             st.markdown("---")
                             st.markdown("</div>", unsafe_allow_html=True)
                             
