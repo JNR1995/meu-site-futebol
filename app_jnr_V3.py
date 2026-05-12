@@ -369,7 +369,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         
         /* Ajuste do Título e Subtítulo */
         .main-title {
-            font-size: 70px !important;
+            font-size: 85px !important;
             text-align: center;
             font-weight: bold;
             line-height: 1.2;
@@ -377,8 +377,8 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         .sub-title {
             text-align: center;
             color: #888;
-            font-size: 20px;
-            margin-bottom: 30px;
+            font-size: 25px;
+            margin-bottom: 35px;
         }
         </style>
     """, unsafe_allow_html=True)
