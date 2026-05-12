@@ -15,13 +15,6 @@ if 'favoritos' not in st.session_state:
 
 if 'username' not in st.session_state:
     st.session_state.username = None
-
-try:
-    df = conn.read()
-    st.success("Conectado!")
-    st.write(df)
-except Exception as e:
-    st.error(e)
     
 # --- FUNÇÃO DE SEGURANÇA (HASH) ---
 def gerar_hash(senha):
