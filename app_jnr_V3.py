@@ -255,7 +255,7 @@ if st.session_state.pagina == 'logon':
                     if gerar_hash(p) == senha_salva:
                         status_ativo = str(user_db.iloc[0]['Ativo']).strip().upper()
 
-                        if status_ativo in ["TRUE", "SIM", "VERDADEIRO"]:
+                        if status_ativo in ["TRUE", "SIM", "1", "VERDADEIRO"]:
                             # LOGIN COM SUCESSO - CONFIGURAR SESSÃO
                             st.session_state.logado = True
                             st.session_state.username = u
