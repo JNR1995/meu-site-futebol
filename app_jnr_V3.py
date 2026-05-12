@@ -141,6 +141,7 @@ def carregar_dados(query, params=None):
     conn.close()
     return df
 
+@st.cache_data(ttl=600)
 def buscar_stats_duplas(id_liga, time, mando):
     conn = sqlite3.connect('FutebolStatsJnr.db')
     sufixo = "_CASA" if mando == 'CASA' else "_FORA"
