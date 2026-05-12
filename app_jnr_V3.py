@@ -660,23 +660,11 @@ elif st.session_state.pagina == 'jogos_dia':
                             exp_bts_m = (s_h_m.get('BTS',0) + s_a_m.get('BTS',0)) / 2
                             exp_05ht_g = (s_h_g.get('OVER_05_HT', 0) + s_a_g.get('OVER_05_HT', 0)) / 2
         
-                            # --- EXIBIÇÃO NO CARD ---
-                            # Envolvemos a linha em um container para poder subir ela também
-                            st.markdown("<div style='margin-top: -175px;'>", unsafe_allow_html=True)
-                            st.markdown("---")
-                            st.markdown("</div>", unsafe_allow_html=True)
-                            
-                            # Injeta um estilo específico para o container das colunas
-                            st.markdown("""
-                                <style>
-                                .container-expectativas {
-                                    margin-top: -165px !important;  /* Aumentei o negativo para subir mais o bloco todo */
-                                }
-                                </style>
-                            """, unsafe_allow_html=True)
-                            
+                            # --- EXIBIÇÃO NO CARD ---   
                             # Abre a div customizada
                             st.markdown('<div class="container-expectativas">', unsafe_allow_html=True)
+
+                            st.markdown("---")
                             
                             col_exp1, col_exp2 = st.columns(2)
         
