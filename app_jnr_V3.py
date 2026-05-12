@@ -229,8 +229,9 @@ def ler_planilha():
         # Exibe uma mensagem clara para o usuário em vez de um erro de Python
         st.error("🏠 Erro de conexão com o banco de dados. Por favor, tente novamente em alguns segundos.")
         return pd.DataFrame()
-        
+# ========================================================= 
 # --- TELA DE LOGON ---
+# =========================================================
 if st.session_state.pagina == 'logon':
     st.markdown('<div class="main-title"><span class="parte-cinza">📊FutebolStats</span><span class="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">O Mundo do futebol em suas mãos</div>', unsafe_allow_html=True)
@@ -288,8 +289,9 @@ if st.session_state.pagina == 'logon':
         if st.button("🆕 Cadastrar novo usuário"):
             st.session_state.pagina = 'cadastro'
             st.rerun()
-
+# =========================================================
 # --- TELA DE CADASTRO ---
+# =========================================================
 elif st.session_state.pagina == 'cadastro':
     st.title("📝 Cadastro")
     with st.form("c"):
@@ -341,26 +343,83 @@ elif st.session_state.pagina == 'cadastro':
     if st.button("Voltar"):
         st.session_state.pagina = 'logon'
         st.rerun()
-        
+
+# =========================================================
 # TELA HOME (SÓ SE LOGADO)
+# =========================================================
 elif st.session_state.pagina == 'home' and st.session_state.logado:
-    st.markdown(f"<p style='text-align:right'>Olá, <b>{st.session_state.username}</b></p>", unsafe_allow_html=True)
-    st.markdown('<div class="main-title"><span class="parte-cinza">📊FutebolStats</span><span class="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-title">O Mundo do futebol em suas mãos</div>', unsafe_allow_html=True)
-    st.write("---")
+    # --- CSS PARA BOTÕES E TÍTULOS ---
+    st.markdown("""
+        <style>
+        /* Estilo para garantir que todos os botões tenham a mesma altura e design */
+        div.stButton > button {
+            width: 100%;
+            height: 60px; /* Altura fixa para todos */
+            border-radius: 10px;
+            border: 1px solid #333;
+            background-color: #1E1E1E;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        /* Efeito de Hover (Passar o mouse) */
+        div.stButton > button:hover {
+            border: 1px solid #00FF7F;
+            color: #00FF7F;
+            background-color: #262626;
+            box-shadow: 0px 4px 15px rgba(0, 255, 127, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Ajuste do Título e Subtítulo */
+        .main-title {
+            font-size: 60px !important;
+            text-align: center;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+        .sub-title {
+            text-align: center;
+            color: #888;
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Saudação discreta no topo
+    st.markdown(f"<p style='text-align:right; color:#666;'>Logado como: <b>{st.session_state.username}</b></p>", unsafe_allow_html=True)
+
+    # Cabeçalho Centralizado
+    st.markdown('<div class="main-title"><span style="color:#888;">📊 FutebolStats</span><span style="color:#00FF7F;">Jnr</span></div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-title">O mundo do futebol em suas mãos</div>', unsafe_allow_html=True)
     
-    c1, c2, c3 = st.columns([1, 2, 1])
+    st.write("") # Espaçador
+
+    # --- BOTÕES CENTRALIZADOS ---
+    # Usamos colunas para criar o efeito de centralização (vazia, conteúdo, vazia)
+    c1, c2, c3 = st.columns([1, 2, 1]) 
+    
     with c2:
-        if st.button("📅 Calendário"):
+        # use_container_width=True faz o botão ocupar toda a largura da coluna c2
+        if st.button("📅 Calendário de Jogos", use_container_width=True):
             st.session_state.pagina = 'jogos_dia'
             st.rerun()
-        if st.button("📈 Estatísticas de Gols"):
+            
+        if st.button("📈 Estatísticas de Gols", use_container_width=True):
             st.session_state.pagina = 'stats'
             st.rerun()
-        if st.button("🎯 Prognósticos"):
+            
+        if st.button("🎯 Prognósticos VIP", use_container_width=True):
             st.session_state.pagina = 'prognosticos'
             st.rerun()
-        if st.button("🚪 Sair"):
+            
+        st.write("---") # Divisor antes do sair
+        
+        if st.button("🚪 Sair do Sistema", use_container_width=True):
             st.session_state.logado = False
             st.session_state.pagina = 'logon'
             st.rerun()
