@@ -458,6 +458,23 @@ elif st.session_state.pagina == 'jogos_dia':
 
     st.title("📅 Calendário de Jogos")
 
+    @st.fragment
+    def renderizar_estrela(fix_id, suffix):
+        # O checkbox agora vive dentro de um "fragmento" isolado
+        is_favo = st.checkbox(
+            "⭐", 
+            value=(fix_id in st.session_state.favoritos), 
+            key=f"check_{fix_id}_{suffix}"
+        )
+        
+        # Se mudar o status, ele processa apenas este bloco
+        if is_favo and fix_id not in st.session_state.favoritos:
+            st.session_state.favoritos.add(fix_id)
+            salvar_favorito_gs(fix_id)
+        elif not is_favo and fix_id in st.session_state.favoritos:
+            st.session_state.favoritos.remove(fix_id)
+            remover_favorito_gs(fix_id)
+            
     # --- FUNÇÃO DO CARD (ESTRELA REMOVIDA - FOCO NO EXPANDER) ---
     def exibir_card_jogo(row, mostrar_liga_no_label=False, suffix="", encerrado=False):
         fix_id = row['ID_Fixture']
@@ -472,22 +489,10 @@ elif st.session_state.pagina == 'jogos_dia':
     
         # 2. ESTRUTURA DE COLUNAS
         col_fav, col_expander = st.columns([0.6, 9.4], gap="small")
-    
+        
         with col_fav:
-            # A estrela agora é independente e não recarrega o card inteiro
-            is_favo = st.checkbox(
-                "⭐", 
-                value=(fix_id in st.session_state.favoritos), 
-                key=f"check_{fix_id}_{suffix}"
-            )
-            
-            # Lógica de atualização silenciosa
-            if is_favo and fix_id not in st.session_state.favoritos:
-                st.session_state.favoritos.add(fix_id)
-                salvar_favorito_gs(fix_id) # Executa em paralelo ao resto
-            elif not is_favo and fix_id in st.session_state.favoritos:
-                st.session_state.favoritos.remove(fix_id)
-                remover_favorito_gs(fix_id)
+            # Chama a função isolada
+            renderizar_estrela(fix_id, suffix)
     
         with col_expander:
             # O PULO DO GATO: O conteúdo só é processado se o expander for aberto
