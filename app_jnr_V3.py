@@ -389,23 +389,30 @@ elif st.session_state.pagina == 'stats':
     if not df_menu.empty:
         lista_paises = sorted(df_menu['Pais'].unique().tolist())
         
-        # 1. Escolha o País
-        idx_p = lista_paises.index(st.session_state.pais_nav) if st.session_state.pais_nav in lista_paises else 0
+        # AJUSTE AQUI: Verifica se o país no state é válido, senão usa o primeiro da lista
+        p_default = st.session_state.pais_nav
+        idx_p = lista_paises.index(p_default) if p_default in lista_paises else 0
+        
         pais_sel = st.sidebar.selectbox("1. Escolha o País:", lista_paises, index=idx_p)
-        st.session_state.pais_nav = pais_sel # Salva a escolha
+        st.session_state.pais_nav = pais_sel # Atualiza para a próxima vez
         
         df_ligas_f = df_menu[df_menu['Pais'] == pais_sel]
         lista_ligas = df_ligas_f['Liga'].tolist()
         
-        # 2. Escolha a Competição
-        idx_l = lista_ligas.index(st.session_state.liga_nav) if st.session_state.liga_nav in lista_ligas else 0
-        liga_sel = st.sidebar.selectbox("2. Escolha a Competição:", lista_ligas, index=idx_l)
-        st.session_state.liga_nav = liga_sel # Salva a escolha
+        # AJUSTE AQUI: Mesma lógica para a liga
+        l_default = st.session_state.liga_nav
+        idx_l = lista_ligas.index(l_default) if l_default in lista_ligas else 0
         
-        # 3. Localizar Time
-        busca_time = st.sidebar.text_input("🔍 Localizar Time:", value=st.session_state.time_nav if st.session_state.time_nav else "")
-        st.session_state.time_nav = busca_time # Salva a busca
+        liga_sel = st.sidebar.selectbox("2. Escolha a Competição:", lista_ligas, index=idx_l)
+        st.session_state.liga_nav = liga_sel # Atualiza para a próxima vez
 
+        # ADICIONE ESTA LINHA ABAIXO:
+        id_final = df_ligas_f[df_ligas_f['Liga'] == liga_sel]['ID_Liga'].values[0]
+
+        # ADICIONE ESTA LINHA:
+        busca_time = st.sidebar.text_input("🔍 Localizar Time:", value=st.session_state.time_nav if st.session_state.time_nav else "")
+        st.session_state.time_nav = busca_time
+        
         st.title(f"📊 {pais_sel}: {liga_sel}")
         data_att, classe_data = buscar_data_atualizacao(id_final)
         st.markdown(f'<p class="update-text-gray">Última atualização de dados da liga em: <span class="{classe_data}">{data_att}</span></p>', unsafe_allow_html=True)
@@ -415,31 +422,24 @@ elif st.session_state.pagina == 'stats':
         # --- FUNÇÃO AUXILIAR PARA RENDERIZAR TABELAS REPETITIVAS ---
         # --- FUNÇÃO AUXILIAR CORRIGIDA ---
         def exibir_tabelas_mando(tabela_base, colunas_sql, colunas_perc, titulo_secao):
-            # 1. Geral
+            # 1. Geral (Correto)
             st.subheader(f"{titulo_secao}")
             df = carregar_dados(f"SELECT {colunas_sql} FROM {tabela_base} WHERE ID_Liga = {id_final}")
             if busca_time: df = df[df['Equipe'].str.contains(busca_time, case=False)]
-            st.dataframe(df.style.format({c: "{:.1f}%" for c in colunas_perc}, precision=2), use_container_width=True, hide_index=True)
+            st.dataframe(df.style.format({c: "{:.1f}%" for c in colunas_perc}, precision=2, na_rep="0.0%"), use_container_width=True, hide_index=True)
             
-            # 2. Casa
+            # 2. Casa (Ajustado para df_c)
             st.subheader(f"🏠 Home")
             df_c = carregar_dados(f"SELECT {colunas_sql} FROM {tabela_base}_CASA WHERE ID_Liga = {id_final}")
             if busca_time: df_c = df_c[df_c['Equipe'].str.contains(busca_time, case=False)]
-            st.dataframe(
-                df.style.format({c: "{:.1f}%" for c in colunas_perc}, precision=2, na_rep="0.0%"), 
-                use_container_width=True, 
-                hide_index=True
-            )
+            st.dataframe(df_c.style.format({c: "{:.1f}%" for c in colunas_perc}, precision=2, na_rep="0.0%"), use_container_width=True, hide_index=True)
 
-            # 3. Fora
+            # 3. Fora (Ajustado para df_f)
             st.subheader(f"✈️ Away")
             df_f = carregar_dados(f"SELECT {colunas_sql} FROM {tabela_base}_FORA WHERE ID_Liga = {id_final}")
             if busca_time: df_f = df_f[df_f['Equipe'].str.contains(busca_time, case=False)]
-            st.dataframe(
-                df.style.format({c: "{:.1f}%" for c in colunas_perc}, precision=2, na_rep="0.0%"), 
-                use_container_width=True, 
-                hide_index=True
-            )
+            st.dataframe(df_f.style.format({c: "{:.1f}%" for c in colunas_perc}, precision=2, na_rep="0.0%"), use_container_width=True, hide_index=True)
+            
         # --- APLICAÇÃO NAS TABS ---
         with tab1:
             cols_ft = 'Equipe, Jogos, MDM, MDS, MD, "0.5+", "1.5+", "2.5+", "3.5+", "4.5+", BTS, CS'
