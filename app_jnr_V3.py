@@ -575,15 +575,13 @@ elif st.session_state.pagina == 'jogos_dia':
                     data_a = buscar_stats_duplas(row['ID_Liga'], row['Away_Team'], 'FORA')
     
                     if data_h and data_a:
-                    s_h_g, s_h_m = data_h["geral"], data_h["mando"]
-                    s_a_g, s_a_m = data_a["geral"], data_a["mando"]
-                    
-                    st.markdown("<style>table { width: 100% !important; table-layout: fixed; }</style>", unsafe_allow_html=True)
-
-                    # --- TABELAS FT (JOGO TODO) ---
-                    st.markdown("<h5 style='text-align: center; font-size: 18px; margin-top: -52px; margin-bottom: -10px;'>📊 Média de Gols Por Jogo</h5>", unsafe_allow_html=True)
-                        # Renderize as colunas de cabeçalho (C1, C2, C3)
-                        c_esp1, c1, c_vazio, c2, c_esp2 = st.columns([1, 8, 0.5, 8, 1])
+                            s_h_g, s_h_m = data_h["geral"], data_h["mando"]
+                            s_a_g, s_a_m = data_a["geral"], data_a["mando"]
+            
+                            st.markdown("<style>table { width: 100% !important; table-layout: fixed; margin-top: -24px !important; }</style>", unsafe_allow_html=True)
+            
+                            st.markdown("<h5 style='text-align: center; font-size: 18px; margin-top: -52px; margin-bottom: -10px;'>📊 Média de Gols Por Jogo</h5>", unsafe_allow_html=True)
+                            c_esp1, c1, c_vazio, c2, c_esp2 = st.columns([1, 8, 0.5, 8, 1])
             
                             with c1: 
                                 st.markdown(f"""
