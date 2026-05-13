@@ -576,36 +576,9 @@ elif st.session_state.pagina == 'jogos_dia':
     
                     if data_h and data_a:
                         # Renderize as colunas de cabeçalho (C1, C2, C3)
-                        c1, c2, c3 = st.columns([2.5, 1, 2.5])
-                        with c1:
-                            st.markdown(f"<div><span class='rank-text'>{row['Pos_Home']}º</span> <b class='team-name'>{row['Home_Team']}</b></div>", unsafe_allow_html=True)
-                            st.markdown(f"<div class='odd-box'>Casa: <b>{row['Odd_Home']:.2f}</b></div>", unsafe_allow_html=True)
-                        with c2:
-                            st.markdown("<div class='card-vs'>VS</div>", unsafe_allow_html=True)
-                        with c3:
-                            st.markdown(f"<div style='text-align:right;'><b class='team-name'>{row['Away_Team']}</b> <span class='rank-text'>{row['Pos_Away']}º</span></div>", unsafe_allow_html=True)
-                            st.markdown(f"<div class='odd-box'>Fora: <b>{row['Odd_Away']:.2f}</b></div>", unsafe_allow_html=True)
-    
-                        st.divider()
-        
-                        data_h = buscar_stats_duplas(row['ID_Liga'], row['Home_Team'], 'CASA')
-                        data_a = buscar_stats_duplas(row['ID_Liga'], row['Away_Team'], 'FORA')
+                        c_esp1, c1, c_vazio, c2, c_esp2 = st.columns([1, 8, 0.5, 8, 1])
             
-                        if data_h and data_a:
-                            s_h_g, s_h_m = data_h["geral"], data_h["mando"]
-                            s_a_g, s_a_m = data_a["geral"], data_a["mando"]
-            
-                            st.markdown("<style>table { width: 100% !important; table-layout: fixed; margin-top: -24px !important; }</style>", unsafe_allow_html=True)
-            
-                            # --- TÍTULO COM MARGEM AJUSTADA ---
-                            st.markdown("<h5 style='text-align: center; font-size: 18px; margin-top: -52px; margin-bottom: -10px;'>📊 Média de Gols Por Jogo</h5>", unsafe_allow_html=True)
-                            c_esp1, c1, c_vazio, c2, c_esp2 = st.columns([1, 8, 0.5, 8, 1])
-                            
-                            # 1. ENVOLVEMOS AS TABELAS EM UM CONTAINER PARA CONTROLAR O ESPAÇO ABAIXO DELAS
-                            st.markdown("<div style='margin-bottom: -40px;'>", unsafe_allow_html=True)
-                            c_esp3, c3, c_vazio2, c4, c_esp4 = st.columns([1, 8, 0.5, 8, 1])
                             with c1: 
-                                # Envolvendo a tabela na classe personalizada
                                 st.markdown(f"""
                                 | Métrica (GERAL) | {row['Home_Team']} | {row['Away_Team']} |
                                 | :--- | :---: | :---: |
@@ -615,10 +588,8 @@ elif st.session_state.pagina == 'jogos_dia':
                                 | BTS | {s_h_g.get('BTS',0):.0f}% | {s_a_g.get('BTS',0):.0f}% |
                                 | Clean Sheet | {s_h_g.get('CS',0):.0f}% | {s_a_g.get('CS',0):.0f}% |
                                 """)
-                                st.markdown('</div>', unsafe_allow_html=True)
-        
+            
                             with c2: 
-                                # Envolvendo a tabela na classe personalizada
                                 st.markdown(f"""
                                 | Métrica (CASA/FORA) | {row['Home_Team']} (C) | {row['Away_Team']} (F) |
                                 | :--- | :---: | :---: |
@@ -628,13 +599,8 @@ elif st.session_state.pagina == 'jogos_dia':
                                 | BTS | **{s_h_m.get('BTS',0):.0f}%** | **{s_a_m.get('BTS',0):.0f}%** |
                                 | Clean Sheet | **{s_h_m.get('CS',0):.0f}%** | **{s_a_m.get('CS',0):.0f}%** |
                                 """)
-                                st.markdown('</div>', unsafe_allow_html=True)
-                                
-                            # --- TÍTULO HT CENTRALIZADO ---
-                            st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 0px; margin-top: -65px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
-
-                            # 1. ENVOLVEMOS AS TABELAS EM UM CONTAINER PARA CONTROLAR O ESPAÇO ABAIXO DELAS
-                            st.markdown("<div style='margin-bottom: -60px;'>", unsafe_allow_html=True)
+            
+                            st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 14px; margin-top: -10px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
                             c_esp3, c3, c_vazio2, c4, c_esp4 = st.columns([1, 8, 0.5, 8, 1])
                             
                             with c3:
@@ -648,7 +614,7 @@ elif st.session_state.pagina == 'jogos_dia':
                                 | BTS HT | {s_h_g.get('BTS_HT',0):.0f}% | {s_a_g.get('BTS_HT',0):.0f}% |
                                 | CS HT | {s_h_g.get('CS_HT',0):.0f}% | {s_a_g.get('CS_HT',0):.0f}% |
                                 """)
-                            
+            
                             with c4:
                                 st.markdown(f"""
                                 | Métrica (CASA/FORA) | {row['Home_Team']} (C) | {row['Away_Team']} (F) |
@@ -660,9 +626,10 @@ elif st.session_state.pagina == 'jogos_dia':
                                 | BTS HT | **{s_h_m.get('BTS_HT',0):.0f}%** | **{s_a_m.get('BTS_HT',0):.0f}%** |
                                 | CS HT | **{s_h_m.get('CS_HT',0):.0f}%** | **{s_a_m.get('CS_HT',0):.0f}%** |
                                 """)
-                            #st.markdown("</div>", unsafe_allow_html=True) # Fecha container das tabelas
-                            
-                            # --- CÁLCULOS (MANTIDOS INTEGRALMENTE) ---
+        
+                            #st.markdown("<br>", unsafe_allow_html=True)
+            
+                            # Cálculos de Expectativa
                             exp_over25_g = (s_h_g.get('OVER_25_FT', 0) + s_a_g.get('OVER_25_FT', 0)) / 2
                             exp_over25_m = (s_h_m.get('OVER_25_FT', 0) + s_a_m.get('OVER_25_FT', 0)) / 2
                             exp_gols_g = (s_h_g.get('MD',0) + s_a_g.get('MD',0)) / 2
@@ -670,50 +637,54 @@ elif st.session_state.pagina == 'jogos_dia':
                             exp_bts_g = (s_h_g.get('BTS',0) + s_a_g.get('BTS',0)) / 2
                             exp_bts_m = (s_h_m.get('BTS',0) + s_a_m.get('BTS',0)) / 2
                             exp_05ht_g = (s_h_g.get('OVER_05_HT', 0) + s_a_g.get('OVER_05_HT', 0)) / 2
-                            
-                            # Cálculos extras das colunas de expectativa
-                            exp_gols_ht_g = (s_h_g.get('MD_HT',0) + s_a_g.get('MD_HT',0)) / 2
-                            exp_gols_ht_m = ((s_h_m.get('MDM_HT',0) + s_a_m.get('MDS_HT',0)) / 2 + (s_a_m.get('MDM_HT',0) + s_h_m.get('MDS_HT',0)) / 2)
-                            exp_bts_ht_g = (s_h_g.get('BTS_HT',0) + s_a_g.get('BTS_HT',0)) / 2
-                            exp_bts_ht_m = (s_h_m.get('BTS_HT',0) + s_a_m.get('BTS_HT',0)) / 2
-                            exp_05ht_m = (s_h_m.get('OVER_05_HT', 0) + s_a_m.get('OVER_05_HT', 0)) / 2
-                            
-                            # --- EXIBIÇÃO DO BLOCO DE EXPECTATIVA (COLADO) ---
-                            st.markdown("<div style='margin-top: -35px; margin-bottom: -85px;'>", unsafe_allow_html=True)
+        
+                            # --- EXIBIÇÃO NO CARD --- 
+                            st.markdown("<div style='margin-top: -70px; margin-bottom: -50px;'>", unsafe_allow_html=True)
                             st.markdown("---")
                             st.markdown("</div>", unsafe_allow_html=True)
-                            
-                            # Injeta o estilo final e abre o container
-                            st.markdown("""
-                                <style>
-                                .container-expectativas { margin-top: -60px !important; }
-                                </style>
-                            """, unsafe_allow_html=True)
-                            
+                            # Abre a div customizada
                             st.markdown('<div class="container-expectativas">', unsafe_allow_html=True)
                             
                             col_exp1, col_exp2 = st.columns(2)
-                            
+        
                             with col_exp1:
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px;'><strong>Prob. Over 2.5 Jogo %</strong></div>
-                                    <div style='font-size: 18px; font-weight: bold; margin-bottom: 8px;'>🔎 {exp_over25_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_over25_m:.1f}%</div>
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px;'><strong>Expc. Gols Jogo (Média)</strong></div>
-                                    <div style='font-size: 18px; font-weight: bold; margin-bottom: 8px;'>⚽ {exp_gols_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_m:.2f}</div>
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px;'><strong>Expc. BTS Jogo %</strong></div>
-                                    <div style='font-size: 18px; font-weight: bold;'>🫂 {exp_bts_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_m:.1f}%</div>
+                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px; margin-top: -10px;'><strong>Prob. Over 2.5 Jogo %</strong></div>
+                                    <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔎 {exp_over25_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_over25_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
-                            
-                            with col_exp2:
+        
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px;'><strong>Prob. +0.5 HT %</strong></div>
-                                    <div style='font-size: 18px; font-weight: bold; margin-bottom: 8px;'>🔄 {exp_05ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_05ht_m:.1f}%</div>
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px;'><strong>Expc. Gols HT (MD)</strong></div>
-                                    <div style='font-size: 18px; font-weight: bold; margin-bottom: 8px;'>⚽ {exp_gols_ht_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_ht_m:.2f}</div>
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px;'><strong>Expc. BTS HT %</strong></div>
-                                    <div style='font-size: 18px; font-weight: bold;'>🫂 {exp_bts_ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_ht_m:.1f}%</div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: -1px; margin-bottom: -5px;'><strong>Expc. Gols Jogo (Média)</strong></div>
+                                    <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_m:.2f}</div>
                                 """, unsafe_allow_html=True)
-                            
+                                    
+                                st.markdown(f"""
+                                    <div style='font-size: 13px; color: #bbb; margin-top: 2px; margin-bottom: -5px;'><strong>Expc. BTS Jogo %</strong></div>
+                                    <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_m:.1f}%</div>
+                                """, unsafe_allow_html=True)
+        
+                            with col_exp2:
+                                exp_gols_ht_g = (s_h_g.get('MD_HT',0) + s_a_g.get('MD_HT',0)) / 2
+                                exp_gols_ht_m = ((s_h_m.get('MDM_HT',0) + s_a_m.get('MDS_HT',0)) / 2 + (s_a_m.get('MDM_HT',0) + s_h_m.get('MDS_HT',0)) / 2)
+                                exp_bts_ht_g = (s_h_g.get('BTS_HT',0) + s_a_g.get('BTS_HT',0)) / 2
+                                exp_bts_ht_m = (s_h_m.get('BTS_HT',0) + s_a_m.get('BTS_HT',0)) / 2
+                                exp_05ht_m = (s_h_m.get('OVER_05_HT', 0) + s_a_m.get('OVER_05_HT', 0)) / 2
+        
+                                st.markdown(f"""
+                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px; margin-top: -10px;'><strong>Prob. +0.5 HT %</strong></div>
+                                    <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔄 {exp_05ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_05ht_m:.1f}%</div>
+                                """, unsafe_allow_html=True)
+        
+                                st.markdown(f"""
+                                    <div style='font-size: 13px; color: #bbb; margin-top: -1px; margin-bottom: -5px;'><strong>Expc. Gols HT (MD)</strong></div>
+                                    <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_ht_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_ht_m:.2f}</div>
+                                """, unsafe_allow_html=True) 
+                                    
+                                st.markdown(f"""
+                                    <div style='font-size: 13px; color: #bbb; margin-top: 2px; margin-bottom: -5px;'><strong>Expc. BTS HT %</strong></div>
+                                    <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_ht_m:.1f}%</div>
+                                """, unsafe_allow_html=True)
+                            # Fecha a div customizada
                             st.markdown('</div>', unsafe_allow_html=True)
                         else:
                             st.warning("⚠️ Estatísticas históricas não encontradas para este confronto.")
