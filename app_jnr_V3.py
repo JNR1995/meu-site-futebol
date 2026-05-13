@@ -672,17 +672,17 @@ elif st.session_state.pagina == 'jogos_dia':
         
                             with col_exp1:
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px; margin-top: -5px;'><strong>Prob. Over 2.5 Jogo %</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px; margin-top: -10px;'><strong>Prob. Over 2.5 Jogo %</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔎 {exp_over25_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_over25_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
         
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: -5px; margin-bottom: -6px;'><strong>Expc. Gols Jogo (Média)</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: -5px; margin-bottom: -2px;'><strong>Expc. Gols Jogo (Média)</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_m:.2f}</div>
                                 """, unsafe_allow_html=True)
                                     
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: 5px; margin-bottom: -6px;'><strong>Expc. BTS Jogo %</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: 5px; margin-bottom: -2px;'><strong>Expc. BTS Jogo %</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
         
@@ -694,17 +694,17 @@ elif st.session_state.pagina == 'jogos_dia':
                                 exp_05ht_m = (s_h_m.get('OVER_05_HT', 0) + s_a_m.get('OVER_05_HT', 0)) / 2
         
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px; margin-top: -5px;'><strong>Prob. +0.5 HT %</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -5px; margin-top: -10px;'><strong>Prob. +0.5 HT %</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔄 {exp_05ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_05ht_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
         
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: -5px; margin-bottom: -6px;'><strong>Expc. Gols HT (MD)</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: -5px; margin-bottom: -2px;'><strong>Expc. Gols HT (MD)</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_ht_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_ht_m:.2f}</div>
                                 """, unsafe_allow_html=True) 
                                     
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: 5px; margin-bottom: -6px;'><strong>Expc. BTS HT %</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: 5px; margin-bottom: -2px;'><strong>Expc. BTS HT %</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_ht_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
                             # Fecha a div customizada
