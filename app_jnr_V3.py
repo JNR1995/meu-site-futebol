@@ -665,7 +665,7 @@ elif st.session_state.pagina == 'jogos_dia':
                             st.markdown('<div class="container-expectativas">', unsafe_allow_html=True)
 
                             st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -1px; margin-top: -30px;'><strong>_____________________________________________________________________________________________________________________________________</strong></div>
+                                    <div style='font-size: 13px; color: #787878; margin-bottom: -1px; margin-top: -30px;'><strong>________________________________________________________________________________________________________________________________________________________________</strong></div>
                                 """, unsafe_allow_html=True)
                             
                             col_exp1, col_exp2 = st.columns(2)
@@ -677,12 +677,12 @@ elif st.session_state.pagina == 'jogos_dia':
                                 """, unsafe_allow_html=True)
         
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: -15px; margin-bottom: -6px;'><strong>Expc. Gols Jogo (Média)</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: -5px; margin-bottom: -6px;'><strong>Expc. Gols Jogo (Média)</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_m:.2f}</div>
                                 """, unsafe_allow_html=True)
                                     
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: 3px; margin-bottom: -6px;'><strong>Expc. BTS Jogo %</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: 5px; margin-bottom: -6px;'><strong>Expc. BTS Jogo %</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
         
@@ -694,17 +694,17 @@ elif st.session_state.pagina == 'jogos_dia':
                                 exp_05ht_m = (s_h_m.get('OVER_05_HT', 0) + s_a_m.get('OVER_05_HT', 0)) / 2
         
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -6px; margin-top: -55px;'><strong>Prob. +0.5 HT %</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -1px; margin-top: -15px;'><strong>Prob. +0.5 HT %</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔄 {exp_05ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_05ht_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
         
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: -15px; margin-bottom: -6px;'><strong>Expc. Gols HT (MD)</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: -5px; margin-bottom: -6px;'><strong>Expc. Gols HT (MD)</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_ht_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_ht_m:.2f}</div>
                                 """, unsafe_allow_html=True) 
                                     
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: 3px; margin-bottom: -6px;'><strong>Expc. BTS HT %</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: 5px; margin-bottom: -6px;'><strong>Expc. BTS HT %</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_ht_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
                             # Fecha a div customizada
