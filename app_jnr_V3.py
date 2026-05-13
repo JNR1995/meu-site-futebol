@@ -677,7 +677,7 @@ elif st.session_state.pagina == 'jogos_dia':
                                 """, unsafe_allow_html=True)
         
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: -5px; margin-bottom: -2px;'><strong>Expc. Gols Jogo (Média)</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: -2px; margin-bottom: -2px;'><strong>Expc. Gols Jogo (Média)</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_m:.2f}</div>
                                 """, unsafe_allow_html=True)
                                     
@@ -699,7 +699,7 @@ elif st.session_state.pagina == 'jogos_dia':
                                 """, unsafe_allow_html=True)
         
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: -5px; margin-bottom: -2px;'><strong>Expc. Gols HT (MD)</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: -2px; margin-bottom: -2px;'><strong>Expc. Gols HT (MD)</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>⚽ {exp_gols_ht_g:.2f} &nbsp; | &nbsp; 🏠-✈️ {exp_gols_ht_m:.2f}</div>
                                 """, unsafe_allow_html=True) 
                                     
