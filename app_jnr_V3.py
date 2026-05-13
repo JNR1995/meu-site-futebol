@@ -631,7 +631,7 @@ elif st.session_state.pagina == 'jogos_dia':
                                 st.markdown('</div>', unsafe_allow_html=True)
                                 
                             # --- TÍTULO HT CENTRALIZADO ---
-                            st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 5px; margin-top: -60px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
+                            st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 5px; margin-top: -65px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
 
                             # 1. ENVOLVEMOS AS TABELAS EM UM CONTAINER PARA CONTROLAR O ESPAÇO ABAIXO DELAS
                             st.markdown("<div style='margin-bottom: -40px;'>", unsafe_allow_html=True)
@@ -679,7 +679,7 @@ elif st.session_state.pagina == 'jogos_dia':
                             exp_05ht_m = (s_h_m.get('OVER_05_HT', 0) + s_a_m.get('OVER_05_HT', 0)) / 2
                             
                             # --- EXIBIÇÃO DO BLOCO DE EXPECTATIVA (COLADO) ---
-                            st.markdown("<div style='margin-top: -15px; margin-bottom: -85px;'>", unsafe_allow_html=True)
+                            st.markdown("<div style='margin-top: -35px; margin-bottom: -85px;'>", unsafe_allow_html=True)
                             st.markdown("---")
                             st.markdown("</div>", unsafe_allow_html=True)
                             
