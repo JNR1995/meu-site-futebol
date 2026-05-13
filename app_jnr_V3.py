@@ -665,7 +665,7 @@ elif st.session_state.pagina == 'jogos_dia':
                             st.markdown('<div class="container-expectativas">', unsafe_allow_html=True)
 
                             st.markdown(f"""
-                                    <div style='font-size: 13px; color: #787878; margin-bottom: -1px; margin-top: -30px;'><strong>______________________________________________________________________________________________________________________________________________________</strong></div>
+                                    <div style='font-size: 13px; color: #787878; margin-bottom: -1px; margin-top: -30px;'><strong>__________________________________________________________________________________________________________________________________________________</strong></div>
                                 """, unsafe_allow_html=True)
                             
                             col_exp1, col_exp2 = st.columns(2)
