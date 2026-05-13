@@ -622,7 +622,7 @@ elif st.session_state.pagina == 'jogos_dia':
                                 | Clean Sheet | **{s_h_m.get('CS',0):.0f}%** | **{s_a_m.get('CS',0):.0f}%** |
                                 """)
             
-                            st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 14px; margin-top: -10px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
+                            st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 14px; margin-top: -100px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
                             c_esp3, c3, c_vazio2, c4, c_esp4 = st.columns([1, 8, 0.5, 8, 1])
                             
                             with c3:
