@@ -595,7 +595,7 @@ elif st.session_state.pagina == 'jogos_dia':
                             s_h_g, s_h_m = data_h["geral"], data_h["mando"]
                             s_a_g, s_a_m = data_a["geral"], data_a["mando"]
             
-                            st.markdown("<style>table { width: 100% !important; table-layout: fixed; margin-top: -4px !important; }</style>", unsafe_allow_html=True)
+                            st.markdown("<style>table { width: 100% !important; table-layout: fixed; margin-top: -24px !important; }</style>", unsafe_allow_html=True)
             
                             st.markdown("<h5 style='text-align: center; font-size: 18px; margin-top: -52px; margin-bottom: -10px;'>📊 Média de Gols Por Jogo</h5>", unsafe_allow_html=True)
                             c_esp1, c1, c_vazio, c2, c_esp2 = st.columns([1, 8, 0.5, 8, 1])
@@ -660,13 +660,12 @@ elif st.session_state.pagina == 'jogos_dia':
                             exp_bts_m = (s_h_m.get('BTS',0) + s_a_m.get('BTS',0)) / 2
                             exp_05ht_g = (s_h_g.get('OVER_05_HT', 0) + s_a_g.get('OVER_05_HT', 0)) / 2
         
-                            # --- EXIBIÇÃO NO CARD ---   
+                            # --- EXIBIÇÃO NO CARD --- 
+                            st.markdown("<div style='margin-top: -40px; margin-bottom: -20px;'>", unsafe_allow_html=True)
+                            st.markdown("---")
+                            st.markdown("</div>", unsafe_allow_html=True)
                             # Abre a div customizada
                             st.markdown('<div class="container-expectativas">', unsafe_allow_html=True)
-
-                            st.markdown(f"""
-                                    <div style='font-size: 13px; color: #333333; margin-bottom: -1px; margin-top: -30px;'><strong>__________________________________________________________________________________________________________________________________________________</strong></div>
-                                """, unsafe_allow_html=True)
                             
                             col_exp1, col_exp2 = st.columns(2)
         
