@@ -672,8 +672,8 @@ elif st.session_state.pagina == 'jogos_dia':
         
                             with col_exp1:
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: 1px; margin-top: -15px;'><strong>Prob. Over 2.5 Jogo %</strong></div>
-                                    <div style='font-size: 18px; font-weight: bold; margin-top: -10;'>🔎 {exp_over25_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_over25_m:.1f}%</div>
+                                    <div style='font-size: 13px; color: #bbb; margin-bottom: 1px; margin-top: -10px;'><strong>Prob. Over 2.5 Jogo %</strong></div>
+                                    <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔎 {exp_over25_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_over25_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
         
                                 st.markdown(f"""
@@ -694,8 +694,8 @@ elif st.session_state.pagina == 'jogos_dia':
                                 exp_05ht_m = (s_h_m.get('OVER_05_HT', 0) + s_a_m.get('OVER_05_HT', 0)) / 2
         
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -1px; margin-top: -15px;'><strong>Prob. +0.5 HT %</strong></div>
-                                    <div style='font-size: 18px; font-weight: bold; margin-top: -5;'>🔄 {exp_05ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_05ht_m:.1f}%</div>
+                                    <div style='font-size: 13px; color: #bbb; margin-bottom: -1px; margin-top: -10px;'><strong>Prob. +0.5 HT %</strong></div>
+                                    <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🔄 {exp_05ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_05ht_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
         
                                 st.markdown(f"""
