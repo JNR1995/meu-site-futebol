@@ -963,25 +963,33 @@ elif st.session_state.pagina == 'prognosticos':
         df_over = carregar_dados(query_over)
 
        if not df_over.empty:
-            # Blindagem contra nulos nas estatísticas e gols
-            cols_fix = ['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']
-            df_over[cols_fix] = df_over[cols_fix].fillna(0)
-            if periodo == "🔚 Encerrados":
-                df_over[['Gols_Home_FT', 'Gols_Away_FT']] = df_over[['Gols_Home_FT', 'Gols_Away_FT']].fillna(0)
+            # Preenche nulos para evitar erros nos cálculos
+            df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']] = df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']].fillna(0)
 
-            # Seus cálculos e favoritos originais
+            # Cálculos
             df_over['Exp_Gols'] = (df_over['MD_Home'] + df_over['MD_Away']) / 2
             df_over['Rec_25_%'] = (df_over['Rec_Home'] + df_over['Rec_Away']) / 2
+            
+            # --- AJUSTE: Coluna de favoritos criada antes dos filtros de exibição ---
             df_over['⭐'] = df_over['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
 
-            # Seus filtros técnicos originais
-            df_over = df_over[(df_over['Exp_Gols'] >= 2.5) & (df_over['Rec_25_%'] >= 61)].copy()
+            # Aplicação dos Filtros Técnicos
+            df_over = df_over[
+                (df_over['Exp_Gols'] >= 2.5) & 
+                (df_over['Rec_25_%'] >= 61)
+            ].copy()
 
             if not df_over.empty:
+                # 2. PROCESSAMENTO DE STATUS PARA ENCERRADOS
                 if periodo == "🔚 Encerrados":
-                    # Placar e Status com conversão segura
-                    df_over['Placar'] = df_over.apply(lambda r: f"{int(float(r['Gols_Home_FT']))} x {int(float(r['Gols_Away_FT']))}", axis=1)
-                    df_over['Status'] = df_over.apply(lambda r: "✅ Over 2.5" if (float(r['Gols_Home_FT']) + float(r['Gols_Away_FT'])) > 2.5 else "❌ Under 2.5", axis=1)
+                    def validar_over(row):
+                        total = row['Gols_Home_FT'] + row['Gols_Away_FT']
+                        return "✅ Over 2.5" if total > 2.5 else "❌ Under 2.5"
+                    
+                    df_over['Placar'] = df_over.apply(lambda r: f"{int(r['Gols_Home_FT'])} x {int(r['Gols_Away_FT'])}", axis=1)
+                    df_over['Status'] = df_over.apply(validar_over, axis=1)
+                    
+                    # Adicionado '⭐' e 'Pais'
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Exp_Gols', 'Rec_25_%', 'Status']
                 else:
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Rec_25_%', 'Exp_Gols']
