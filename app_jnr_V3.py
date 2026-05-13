@@ -631,7 +631,7 @@ elif st.session_state.pagina == 'jogos_dia':
                                 st.markdown('</div>', unsafe_allow_html=True)
                                 
                             # --- TÍTULO HT CENTRALIZADO ---
-                            st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 5px; margin-top: -65px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
+                            st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 0px; margin-top: -65px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
 
                             # 1. ENVOLVEMOS AS TABELAS EM UM CONTAINER PARA CONTROLAR O ESPAÇO ABAIXO DELAS
                             st.markdown("<div style='margin-bottom: -60px;'>", unsafe_allow_html=True)
@@ -686,7 +686,7 @@ elif st.session_state.pagina == 'jogos_dia':
                             # Injeta o estilo final e abre o container
                             st.markdown("""
                                 <style>
-                                .container-expectativas { margin-top: -20px !important; }
+                                .container-expectativas { margin-top: -60px !important; }
                                 </style>
                             """, unsafe_allow_html=True)
                             
