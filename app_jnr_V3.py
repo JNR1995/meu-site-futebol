@@ -679,7 +679,7 @@ elif st.session_state.pagina == 'jogos_dia':
                             exp_05ht_m = (s_h_m.get('OVER_05_HT', 0) + s_a_m.get('OVER_05_HT', 0)) / 2
                             
                             # --- EXIBIÇÃO DO BLOCO DE EXPECTATIVA (COLADO) ---
-                            st.markdown("<div style='margin-top: -10px; margin-bottom: -15px;'>", unsafe_allow_html=True)
+                            st.markdown("<div style='margin-top: -10px; margin-bottom: -55px;'>", unsafe_allow_html=True)
                             st.markdown("---")
                             st.markdown("</div>", unsafe_allow_html=True)
                             
