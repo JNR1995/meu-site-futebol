@@ -598,8 +598,41 @@ elif st.session_state.pagina == 'jogos_dia':
                             st.markdown("<style>table { width: 100% !important; table-layout: fixed; margin-top: -24px !important; }</style>", unsafe_allow_html=True)
             
                             # --- TÍTULO COM MARGEM AJUSTADA ---
-                            st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 5px; margin-top: -10px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
+                            st.markdown("<h5 style='text-align: center; font-size: 18px; margin-top: -52px; margin-bottom: -10px;'>📊 Média de Gols Por Jogo</h5>", unsafe_allow_html=True)
+                            c_esp1, c1, c_vazio, c2, c_esp2 = st.columns([1, 8, 0.5, 8, 1])
                             
+                            # 1. ENVOLVEMOS AS TABELAS EM UM CONTAINER PARA CONTROLAR O ESPAÇO ABAIXO DELAS
+                            st.markdown("<div style='margin-bottom: -40px;'>", unsafe_allow_html=True)
+                            c_esp3, c3, c_vazio2, c4, c_esp4 = st.columns([1, 8, 0.5, 8, 1])
+                            with c1: 
+                                # Envolvendo a tabela na classe personalizada
+                                st.markdown(f"""
+                                | Métrica (GERAL) | {row['Home_Team']} | {row['Away_Team']} |
+                                | :--- | :---: | :---: |
+                                | Gols Marcados | {s_h_g.get('MDM',0):.2f} | {s_a_g.get('MDM',0):.2f} |
+                                | Gols Sofridos | {s_h_g.get('MDS',0):.2f} | {s_a_g.get('MDS',0):.2f} |
+                                | Média Total | {s_h_g.get('MD',0):.2f} | {s_a_g.get('MD',0):.2f} |
+                                | BTS | {s_h_g.get('BTS',0):.0f}% | {s_a_g.get('BTS',0):.0f}% |
+                                | Clean Sheet | {s_h_g.get('CS',0):.0f}% | {s_a_g.get('CS',0):.0f}% |
+                                """)
+                                st.markdown('</div>', unsafe_allow_html=True)
+        
+                            with c2: 
+                                # Envolvendo a tabela na classe personalizada
+                                st.markdown(f"""
+                                | Métrica (CASA/FORA) | {row['Home_Team']} (C) | {row['Away_Team']} (F) |
+                                | :--- | :---: | :---: |
+                                | Gols Marcados | **{s_h_m.get('MDM',0):.2f}** | **{s_a_m.get('MDM',0):.2f}** |
+                                | Gols Sofridos | **{s_h_m.get('MDS',0):.2f}** | **{s_a_m.get('MDS',0):.2f}** |
+                                | Média Total | **{s_h_m.get('MD',0):.2f}** | **{s_a_m.get('MD',0):.2f}** |
+                                | BTS | **{s_h_m.get('BTS',0):.0f}%** | **{s_a_m.get('BTS',0):.0f}%** |
+                                | Clean Sheet | **{s_h_m.get('CS',0):.0f}%** | **{s_a_m.get('CS',0):.0f}%** |
+                                """)
+                                st.markdown('</div>', unsafe_allow_html=True)
+                                
+                            # --- TÍTULO HT CENTRALIZADO ---
+                            st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 5px; margin-top: -10px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
+
                             # 1. ENVOLVEMOS AS TABELAS EM UM CONTAINER PARA CONTROLAR O ESPAÇO ABAIXO DELAS
                             st.markdown("<div style='margin-bottom: -40px;'>", unsafe_allow_html=True)
                             c_esp3, c3, c_vazio2, c4, c_esp4 = st.columns([1, 8, 0.5, 8, 1])
