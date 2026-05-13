@@ -682,7 +682,7 @@ elif st.session_state.pagina == 'jogos_dia':
                                 """, unsafe_allow_html=True)
                                     
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: 3px; margin-bottom: -2px;'><strong>Expc. BTS Jogo %</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: 2px; margin-bottom: -5px;'><strong>Expc. BTS Jogo %</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
         
@@ -704,7 +704,7 @@ elif st.session_state.pagina == 'jogos_dia':
                                 """, unsafe_allow_html=True) 
                                     
                                 st.markdown(f"""
-                                    <div style='font-size: 13px; color: #bbb; margin-top: 3px; margin-bottom: -2px;'><strong>Expc. BTS HT %</strong></div>
+                                    <div style='font-size: 13px; color: #bbb; margin-top: 2px; margin-bottom: -5px;'><strong>Expc. BTS HT %</strong></div>
                                     <div style='font-size: 18px; font-weight: bold; margin-top: 0;'>🫂 {exp_bts_ht_g:.1f}% &nbsp; | &nbsp; 🏠-✈️ {exp_bts_ht_m:.1f}%</div>
                                 """, unsafe_allow_html=True)
                             # Fecha a div customizada
