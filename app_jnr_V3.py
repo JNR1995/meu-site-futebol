@@ -634,7 +634,7 @@ elif st.session_state.pagina == 'jogos_dia':
                             st.markdown("<h5 style='text-align: center; font-size: 19px; margin-bottom: 5px; margin-top: -65px;'>⏱️ Média de Gols HT</h5>", unsafe_allow_html=True)
 
                             # 1. ENVOLVEMOS AS TABELAS EM UM CONTAINER PARA CONTROLAR O ESPAÇO ABAIXO DELAS
-                            st.markdown("<div style='margin-bottom: -40px;'>", unsafe_allow_html=True)
+                            st.markdown("<div style='margin-bottom: -60px;'>", unsafe_allow_html=True)
                             c_esp3, c3, c_vazio2, c4, c_esp4 = st.columns([1, 8, 0.5, 8, 1])
                             
                             with c3:
