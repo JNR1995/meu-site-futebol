@@ -1164,12 +1164,15 @@ elif st.session_state.pagina == 'prognosticos':
         df_ht = carregar_dados(query_ht)
 
         if not df_ht.empty:
-            # Preenchimento de nulos e cálculos
+            # --- INÍCIO DA TRATATIVA DE SEGURANÇA (SEM PERDER NADA) ---
             df_ht[['HT_Home', 'HT_Away', 'Rec_Home', 'Rec_Away']] = df_ht[['HT_Home', 'HT_Away', 'Rec_Home', 'Rec_Away']].fillna(0)
+            # Garantia para colunas de gols em encerrados
+            if periodo == "🔚 Encerrados":
+                df_ht[['Gols_Home_HT', 'Gols_Away_HT']] = df_ht[['Gols_Home_HT', 'Gols_Away_HT']].fillna(0)
+
+            # Seus cálculos originais
             df_ht['Exp_HT'] = (df_ht['HT_Home'] + df_ht['HT_Away']) / 2
             df_ht['Rec_HT_%'] = (df_ht['Rec_Home'] + df_ht['Rec_Away']) / 2
-            
-            # --- AJUSTE: Coluna de favoritos criada antes dos filtros ---
             df_ht['⭐'] = df_ht['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
 
             # Filtros Técnicos
@@ -1180,12 +1183,14 @@ elif st.session_state.pagina == 'prognosticos':
 
             if not df_ht.empty:
                 if periodo == "🔚 Encerrados":
-                    def validar_ht(row):
-                        return "✅ Green HT" if (row['Gols_Home_HT'] + row['Gols_Away_HT']) > 0 else "❌ Red HT"
+                    df_ht['Placar HT'] = df_ht.apply(
+                        lambda r: f"{int(float(r['Gols_Home_HT']))} x {int(float(r['Gols_Away_HT']))}", axis=1
+                    )
+                    # Sua lógica de status original
+                    df_ht['Status'] = df_ht.apply(
+                        lambda row: "✅ Green HT" if (float(row['Gols_Home_HT']) + float(row['Gols_Away_HT'])) > 0 else "❌ Red HT", axis=1
+                    )
                     
-                    df_ht['Placar HT'] = df_ht.apply(lambda r: f"{int(r['Gols_Home_HT'])} x {int(r['Gols_Away_HT'])}", axis=1)
-                    df_ht['Status'] = df_ht.apply(validar_ht, axis=1)
-                    # Incluído '⭐' e 'Pais'
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Placar HT', 'Away_Team', 'Exp_HT', 'Status']
                 else:
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Exp_HT', 'Rec_HT_%']
