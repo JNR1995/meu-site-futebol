@@ -660,7 +660,7 @@ elif st.session_state.pagina == 'jogos_dia':
                                 | BTS HT | **{s_h_m.get('BTS_HT',0):.0f}%** | **{s_a_m.get('BTS_HT',0):.0f}%** |
                                 | CS HT | **{s_h_m.get('CS_HT',0):.0f}%** | **{s_a_m.get('CS_HT',0):.0f}%** |
                                 """)
-                            st.markdown("</div>", unsafe_allow_html=True) # Fecha container das tabelas
+                            #st.markdown("</div>", unsafe_allow_html=True) # Fecha container das tabelas
                             
                             # --- CÁLCULOS (MANTIDOS INTEGRALMENTE) ---
                             exp_over25_g = (s_h_g.get('OVER_25_FT', 0) + s_a_g.get('OVER_25_FT', 0)) / 2
