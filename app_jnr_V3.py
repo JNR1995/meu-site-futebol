@@ -412,6 +412,27 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     # --- CSS PARA BOTÕES E TÍTULOS ---
     st.markdown("""
         <style>
+        /* 1. FUNDO ANIMADO COM GIF */
+        [data-testid="stAppViewContainer"] {{
+            background-image: url("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3VtNmpqbmNzZnVrODFsMmN1cW4wZ3FidHlhYjI3dDQ4dnZ2NmxwaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/eydSI1JrEVsT26mp5g/giphy.gif");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+
+        /* Camada de escurecimento para dar contraste ao Neon */
+        [data-testid="stAppViewContainer"]::before {{
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75); /* Ajuste aqui se quiser mais ou menos brilho do fundo */
+            z-index: -1;
+        }}
+        
         /* Estilo para garantir que todos os botões tenham a mesma altura e design */
         div.stButton > button {
             width: 55%; /* Sua largura atual */
