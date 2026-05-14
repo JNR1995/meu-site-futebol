@@ -415,7 +415,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         /* 1. FUNDO ANIMADO COM GIF */
         .stApp {
             background-image: url("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3VtNmpqbmNzZnVrODFsMmN1cW4wZ3FidHlhYjI3dDQ4dnZ2NmxwaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/eydSI1JrEVsT26mp5g/giphy.gif");
-            background-size: cover;
+            background-size: 80%;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
