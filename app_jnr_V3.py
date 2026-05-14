@@ -995,48 +995,48 @@ elif st.session_state.pagina == 'prognosticos':
             st.info("Nenhum dado disponível.")
 
     with tab_over:
-    st.subheader(f"⚽ Expectativa Over 2.5 Gols ({periodo})")
+        st.subheader(f"⚽ Expectativa Over 2.5 Gols ({periodo})")
+        
+        # --- NOVO: FILTROS RÁPIDOS ESTILO EXCEL ---
+        # Criamos 3 colunas para os inputs de texto
+        col_f1, col_f2, col_f3 = st.columns([1, 1, 2])
+        with col_f1:
+            f_pais = st.text_input("🔍 País", key=f"filter_pais_over_{periodo}").strip().lower()
+        with col_f2:
+            f_liga = st.text_input("🔍 Liga", key=f"filter_liga_over_{periodo}").strip().lower()
+        with col_f3:
+            f_time = st.text_input("🔍 Time (Casa ou Fora)", key=f"filter_time_over_{periodo}").strip().lower()
     
-    # --- NOVO: FILTROS RÁPIDOS ESTILO EXCEL ---
-    # Criamos 3 colunas para os inputs de texto
-    col_f1, col_f2, col_f3 = st.columns([1, 1, 2])
-    with col_f1:
-        f_pais = st.text_input("🔍 País", key=f"filter_pais_over_{periodo}").strip().lower()
-    with col_f2:
-        f_liga = st.text_input("🔍 Liga", key=f"filter_liga_over_{periodo}").strip().lower()
-    with col_f3:
-        f_time = st.text_input("🔍 Time (Casa ou Fora)", key=f"filter_time_over_{periodo}").strip().lower()
-
-    # 1. QUERY ISOLADA
-    if periodo == "🔚 Encerrados":
-        query_over = '''
-            SELECT 
-                E.ID_Fixture, E.Data, 
-                E.Liga as Liga, L.Pais,
-                E.Home_Team, E.Away_Team,
-                E.Gols_Home_FT, E.Gols_Away_FT,
-                S1.MD as MD_Home, S2.MD as MD_Away,
-                S1."2.5+" as Rec_Home, S2."2.5+" as Rec_Away
-            FROM JOGOS_ENCERRADOS E
-            LEFT JOIN LIGAS L ON E.ID_Liga = L.ID_Liga
-            LEFT JOIN STATS_GOLS S1 ON E.ID_Liga = S1.ID_Liga AND E.Home_Team = S1.Equipe
-            LEFT JOIN STATS_GOLS S2 ON E.ID_Liga = S2.ID_Liga AND E.Away_Team = S2.Equipe
-            ORDER BY E.Data DESC
-        '''
-    else:
-        tabela_alvo = "JOGOS_HOJE" if periodo == "⚽ Hoje" else "JOGOS_AMANHA"
-        query_over = f'''
-            SELECT 
-                J.ID_Fixture, J.Hora, L.Pais, J.Liga_Nome as Liga, 
-                J.Home_Team, J.Away_Team,
-                S1.MD as MD_Home, S2.MD as MD_Away,
-                S1."2.5+" as Rec_Home, S2."2.5+" as Rec_Away
-            FROM {tabela_alvo} J
-            LEFT JOIN LIGAS L ON J.ID_Liga = L.ID_Liga
-            LEFT JOIN STATS_GOLS S1 ON J.ID_Liga = S1.ID_Liga AND J.Home_Team = S1.Equipe
-            LEFT JOIN STATS_GOLS S2 ON J.ID_Liga = S2.ID_Liga AND J.Away_Team = S2.Equipe
-            ORDER BY J.Hora ASC
-        '''
+        # 1. QUERY ISOLADA
+        if periodo == "🔚 Encerrados":
+            query_over = '''
+                SELECT 
+                    E.ID_Fixture, E.Data, 
+                    E.Liga as Liga, L.Pais,
+                    E.Home_Team, E.Away_Team,
+                    E.Gols_Home_FT, E.Gols_Away_FT,
+                    S1.MD as MD_Home, S2.MD as MD_Away,
+                    S1."2.5+" as Rec_Home, S2."2.5+" as Rec_Away
+                FROM JOGOS_ENCERRADOS E
+                LEFT JOIN LIGAS L ON E.ID_Liga = L.ID_Liga
+                LEFT JOIN STATS_GOLS S1 ON E.ID_Liga = S1.ID_Liga AND E.Home_Team = S1.Equipe
+                LEFT JOIN STATS_GOLS S2 ON E.ID_Liga = S2.ID_Liga AND E.Away_Team = S2.Equipe
+                ORDER BY E.Data DESC
+            '''
+        else:
+            tabela_alvo = "JOGOS_HOJE" if periodo == "⚽ Hoje" else "JOGOS_AMANHA"
+            query_over = f'''
+                SELECT 
+                    J.ID_Fixture, J.Hora, L.Pais, J.Liga_Nome as Liga, 
+                    J.Home_Team, J.Away_Team,
+                    S1.MD as MD_Home, S2.MD as MD_Away,
+                    S1."2.5+" as Rec_Home, S2."2.5+" as Rec_Away
+                FROM {tabela_alvo} J
+                LEFT JOIN LIGAS L ON J.ID_Liga = L.ID_Liga
+                LEFT JOIN STATS_GOLS S1 ON J.ID_Liga = S1.ID_Liga AND J.Home_Team = S1.Equipe
+                LEFT JOIN STATS_GOLS S2 ON J.ID_Liga = S2.ID_Liga AND J.Away_Team = S2.Equipe
+                ORDER BY J.Hora ASC
+            '''
 
     df_over = carregar_dados(query_over)
 
