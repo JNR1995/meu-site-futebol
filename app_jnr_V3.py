@@ -441,23 +441,11 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
             box-shadow: 0px 4px 15px rgba(0, 255, 127, 0.2);
             transform: translateY(-2px);
         }
-        
-        /* Ajuste do Título e Subtítulo */
-        .main-title { 
-        font-family: 'Bebas Neue', cursive, sans-serif; 
-        font-size: 110px !important; /* Ajustei para 110px para caber melhor na tela */
-        text-align: center; 
-        margin-bottom: -15px; 
-        line-height: 1; 
-        font-weight: bold;
-        display: block;
-        width: 100%;
-    }
 
     /* Cores dentro do título */
     .main-title { 
         font-family: 'Bebas Neue', cursive, sans-serif; 
-        font-size: 110px !important; 
+        font-size: 150px !important; 
         text-align: center; 
         font-weight: bold;
         line-height: 1;
@@ -471,12 +459,8 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     /* A parte verde NEON */
     .parte-verde { 
         color: #00FF7F !important; 
-        text-shadow: 
-            0 0 10px #00FF7F, 
-            0 0 20px #00FF7F, 
-            0 0 40px rgba(0, 255, 127, 0.7) !important;
+        text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.5);
     }
-    
         .sub-title {
             text-align: center;
             color: #888;
