@@ -445,7 +445,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     /* Cores dentro do título */
     .main-title { 
         font-family: 'Bebas Neue', cursive, sans-serif; 
-        font-size: 150px !important; 
+        font-size: 155px !important; 
         text-align: center; 
         font-weight: bold;
         line-height: 1;
@@ -464,7 +464,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         .sub-title {
             text-align: center;
             color: #888;
-            font-size: 25px;
+            font-size: 23px;
             margin-bottom: 35px;
         }
         </style>
