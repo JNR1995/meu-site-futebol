@@ -455,13 +455,24 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     }
 
     /* Cores dentro do título */
-    .main-title .parte-cinza { 
-        color: #888888 !important; 
+    .main-title { 
+        font-family: 'Bebas Neue', cursive, sans-serif; 
+        font-size: 150px !important; 
+        text-align: center; 
+        margin-bottom: -15px; 
+        line-height: 1; 
+        font-weight: bold;
     }
 
-    .main-title .parte-verde { 
-        color: #00FF7F !important;
-        text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.5);
+    /* Parte Cinza do Nome */
+    .parte-cinza { 
+        color: #888888; 
+    }
+
+    /* Parte Verde Neon */
+    .parte-verde { 
+        color: #00FF7F; 
+        text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.5); 
     }
         .sub-title {
             text-align: center;
@@ -476,7 +487,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     st.markdown(f"<p style='text-align:right; color:#FFFFFF;'>Olá: <b>{st.session_state.username}</b></p>", unsafe_allow_html=True)
 
     # Cabeçalho Centralizado
-    st.markdown('<div class="main-title"><span style="color:#888;">📊 FutebolStats</span><span style="color:#00FF7F;">Jnr</span></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title"><span style="parte-cinza">📊 FutebolStats</span><span style="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">O mundo do futebol em suas mãos</div>', unsafe_allow_html=True)
     
     st.write("") # Espaçador
