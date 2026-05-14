@@ -414,8 +414,16 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         <style>
         /* Estilo para garantir que todos os botões tenham a mesma altura e design */
         div.stButton > button {
-            width: 75%;
-            height: 25px; /* Altura fixa para todos */
+            width: 75%; /* Sua largura atual */
+            height: 35px; /* Altura sugerida para não cortar o texto */
+            
+            /* ESTAS LINHAS ABAIXO CENTRALIZAM */
+            display: block; 
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 10px; /* Espaço entre um botão e outro */
+
+            /* Seus outros estilos permanecem iguais */
             border-radius: 10px;
             border: 1px solid #333;
             background-color: #1E1E1E;
@@ -423,7 +431,6 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
             font-size: 18px;
             font-weight: bold;
             transition: all 0.3s ease;
-            margin-bottom: 10px;
         }
 
         /* Efeito de Hover (Passar o mouse) */
