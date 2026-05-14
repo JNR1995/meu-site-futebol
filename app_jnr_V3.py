@@ -865,37 +865,29 @@ elif st.session_state.pagina == 'prognosticos':
 
         df_fav = carregar_dados(query_fav)
 
-        if not df_over.empty:
-            # Preenche nulos para evitar erros nos cálculos
-            df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']] = df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']].fillna(0)
+        if not df_fav.empty:
+            df_fav = df_fav.fillna(0)
 
-            # Cálculos
-            df_over['Exp_Gols'] = (df_over['MD_Home'] + df_over['MD_Away']) / 2
-            df_over['Rec_25_%'] = (df_over['Rec_Home'] + df_over['Rec_Away']) / 2
-            
-            # --- AJUSTE: Coluna de favoritos criada antes dos filtros de exibição ---
-            df_over['⭐'] = df_over['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
+            # --- AJUSTE: A coluna de favoritos agora é criada para TODOS os períodos ---
+            df_fav['⭐'] = df_fav['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
 
-            # Aplicação dos Filtros Técnicos
-            df_over = df_over[
-                (df_over['Exp_Gols'] >= 2.5) & 
-                (df_over['Rec_25_%'] >= 61)
-            ].copy()
+            # 2. PROCESSAMENTO
+            if periodo == "🔚 Encerrados":
+                def checar_vitoria_fav(row):
+                    casa_fav = 0 < row['Odd_Home'] <= 1.72
+                    if row['Gols_Home_FT'] == row['Gols_Away_FT']: return "🟰 Empate"
+                    if casa_fav:
+                        return "✅ Vitória" if row['Gols_Home_FT'] > row['Gols_Away_FT'] else "❌ Derrota"
+                    else:
+                        return "✅ Vitória" if row['Gols_Away_FT'] > row['Gols_Home_FT'] else "❌ Derrota"
 
-            if not df_over.empty:
-                # 2. PROCESSAMENTO DE STATUS PARA ENCERRADOS
-                if periodo == "🔚 Encerrados":
-                    def validar_over(row):
-                        total = row['Gols_Home_FT'] + row['Gols_Away_FT']
-                        return "✅ Over 2.5" if total > 2.5 else "❌ Under 2.5"
-                    
-                    df_over['Placar'] = df_over.apply(lambda r: f"{int(r['Gols_Home_FT'])} x {int(r['Gols_Away_FT'])}", axis=1)
-                    df_over['Status'] = df_over.apply(validar_over, axis=1)
-                    
-                    # Adicionado '⭐' e 'Pais'
-                    cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Exp_Gols', 'Rec_25_%', 'Status']
-                else:
-                    cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Rec_25_%', 'Exp_Gols']
+                df_fav['Placar'] = df_fav.apply(lambda r: f"{int(r['Gols_Home_FT'])} x {int(r['Gols_Away_FT'])}", axis=1)
+                df_fav['Status'] = df_fav.apply(checar_vitoria_fav, axis=1)
+                
+                # Adicionado '⭐' e 'Pais' nas colunas de encerrados
+                cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Odd_Home', 'Odd_Away', 'Status']
+            else:
+                cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Odd_Home', 'Odd_Away']
 
             # 3. FILTRO DE EXIBIÇÃO (MODO SALVOS)
             df_display = df_fav.copy()
@@ -971,66 +963,37 @@ elif st.session_state.pagina == 'prognosticos':
         df_over = carregar_dados(query_over)
 
         if not df_over.empty:
-
             # Preenche nulos para evitar erros nos cálculos
-
             df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']] = df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']].fillna(0)
 
-
-
             # Cálculos
-
             df_over['Exp_Gols'] = (df_over['MD_Home'] + df_over['MD_Away']) / 2
-
             df_over['Rec_25_%'] = (df_over['Rec_Home'] + df_over['Rec_Away']) / 2
-
             
-
             # --- AJUSTE: Coluna de favoritos criada antes dos filtros de exibição ---
-
             df_over['⭐'] = df_over['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
 
-
-
             # Aplicação dos Filtros Técnicos
-
             df_over = df_over[
-
                 (df_over['Exp_Gols'] >= 2.5) & 
-
                 (df_over['Rec_25_%'] >= 61)
-
             ].copy()
 
-
-
             if not df_over.empty:
-
                 # 2. PROCESSAMENTO DE STATUS PARA ENCERRADOS
-
                 if periodo == "🔚 Encerrados":
-
                     def validar_over(row):
-
                         total = row['Gols_Home_FT'] + row['Gols_Away_FT']
-
                         return "✅ Over 2.5" if total > 2.5 else "❌ Under 2.5"
-
                     
-
                     df_over['Placar'] = df_over.apply(lambda r: f"{int(r['Gols_Home_FT'])} x {int(r['Gols_Away_FT'])}", axis=1)
-
                     df_over['Status'] = df_over.apply(validar_over, axis=1)
-
                     
-
                     # Adicionado '⭐' e 'Pais'
-
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Exp_Gols', 'Rec_25_%', 'Status']
-
                 else:
-
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Rec_25_%', 'Exp_Gols']
+
                 # 3. FILTRO DE EXIBIÇÃO (MODO SALVOS)
                 df_display = df_over.copy()
                 if exibir_modo == "Salvos ⭐":
