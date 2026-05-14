@@ -414,7 +414,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         <style>
         /* Estilo para garantir que todos os botões tenham a mesma altura e design */
         div.stButton > button {
-            width: 75%; /* Sua largura atual */
+            width: 55%; /* Sua largura atual */
             height: 35px; /* Altura sugerida para não cortar o texto */
             
             /* ESTAS LINHAS ABAIXO CENTRALIZAM */
@@ -444,7 +444,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         
         /* Ajuste do Título e Subtítulo */
         .main-title {
-            font-size: 125px !important;
+            font-size: 150px !important;
             text-align: center;
             font-weight: bold;
             line-height: 1.2;
