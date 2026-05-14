@@ -901,11 +901,6 @@ elif st.session_state.pagina == 'prognosticos':
         "⏱️ Gol HT"
     ])
 
-    Finalizando com a aba Super Favoritos! 🚀
-
-Nesta aba, adaptei o quarto filtro para Odd Mínima. Como você mencionou que o conceito é "Maior ou Igual", a lógica permitirá que você filtre, por exemplo, apenas favoritos com Odd acima de 1.20, dentro daquela faixa de segurança que você já definiu na query (até 1.72).
-
-Python
     with tab_fav:
         st.subheader(f"🚀 Super favoritos ({periodo})")
 
