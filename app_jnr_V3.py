@@ -460,8 +460,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     }
 
     .main-title .parte-verde { 
-        color: #00FF7F !important; 
-        /* Efeito Neon com várias camadas de sombra */
+        color: #00FF7F !important;
         text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.5);
     }
         .sub-title {
