@@ -184,9 +184,9 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Saira+Stencil:ital,wght@0,100..900;1,100..900&display=swap');
 
-    .main-title { font-family: 'Bebas Neue', cursive; font-size: 105px !important; text-align: center; margin-bottom: -15px; line-height: 8; }
+    .main-title { font-family: 'Bebas Neue', cursive; font-size: 105px !important; text-align: center; margin-bottom: -15px; line-height: 1; }
     .parte-cinza { color: #888888; }
-    .parte-verde { color: #00FF7F; text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.3); }
+    .parte-verde { color: #00FF7F; text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.8); }
     .sub-title { font-family: "Saira Stencil", sans-serif; font-size: 26px !important; font-weight: 300; color: #AAAAAA; text-align: center; letter-spacing: 3px; text-transform: uppercase; margin-top: 5px; }
     
     .liga-header { text-align: center; background-color: #1E1E1E; color: #FFFFFF; padding: 4px; font-weight: bold; font-size: 22px; border-radius: 8px; margin-top: 5px; border: 1px solid #333; margin-bottom: -1px !important; }
