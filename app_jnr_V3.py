@@ -997,17 +997,21 @@ elif st.session_state.pagina == 'prognosticos':
     with tab_over:
         st.subheader(f"⚽ Expectativa Over 2.5 Gols ({periodo})")
         
-        # --- NOVO: FILTROS RÁPIDOS ESTILO EXCEL ---
-        # Criamos 3 colunas para os inputs de texto
-        col_f1, col_f2, col_f3 = st.columns([1, 1, 2])
+        # --- FILTROS RÁPIDOS EVOLUÍDOS ---
+        # Adicionei uma 4ª coluna para a Recorrência
+        col_f1, col_f2, col_f3, col_f4 = st.columns([1, 1, 1.5, 1])
+        
         with col_f1:
-            f_pais = st.text_input("🔍 País", key=f"filter_pais_over_{periodo}").strip().lower()
+            f_pais = st.text_input("🔍 País", key=f"f_pais_ov_{periodo}").strip().lower()
         with col_f2:
-            f_liga = st.text_input("🔍 Liga", key=f"filter_liga_over_{periodo}").strip().lower()
+            f_liga = st.text_input("🔍 Liga", key=f"f_liga_ov_{periodo}").strip().lower()
         with col_f3:
-            f_time = st.text_input("🔍 Time (Casa ou Fora)", key=f"filter_time_over_{periodo}").strip().lower()
-    
-        # 1. QUERY ISOLADA
+            f_time = st.text_input("🔍 Time", key=f"f_time_ov_{periodo}").strip().lower()
+        with col_f4:
+            # Filtro numérico para Recorrência
+            f_rec_min = st.text_input("📈 Rec. Min %", placeholder="Ex: 80", key=f"f_rec_ov_{periodo}")
+
+        # 1. QUERY ISOLADA (Mantendo sua estrutura original)
         if periodo == "🔚 Encerrados":
             query_over = '''
                 SELECT 
@@ -1038,36 +1042,40 @@ elif st.session_state.pagina == 'prognosticos':
                 ORDER BY J.Hora ASC
             '''
 
-    df_over = carregar_dados(query_over)
+        df_over = carregar_dados(query_over)
 
-    if not df_over.empty:
-        # Preenche nulos para evitar erros nos cálculos
-        df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']] = df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']].fillna(0)
+        if not df_over.empty:
+            # Preenchimento de nulos e cálculos
+            df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']] = df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']].fillna(0)
+            df_over['Exp_Gols'] = (df_over['MD_Home'] + df_over['MD_Away']) / 2
+            df_over['Rec_25_%'] = (df_over['Rec_Home'] + df_over['Rec_Away']) / 2
+            df_over['⭐'] = df_over['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
 
-        # Cálculos
-        df_over['Exp_Gols'] = (df_over['MD_Home'] + df_over['MD_Away']) / 2
-        df_over['Rec_25_%'] = (df_over['Rec_Home'] + df_over['Rec_Away']) / 2
-        
-        # --- AJUSTE: Coluna de favoritos criada antes dos filtros de exibição ---
-        df_over['⭐'] = df_over['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
-
-        # Aplicação dos Filtros Técnicos Originais
-        df_over = df_over[
-            (df_over['Exp_Gols'] >= 2.5) & 
-            (df_over['Rec_25_%'] >= 61)
-        ].copy()
-
-        # --- NOVO: APLICAÇÃO DOS FILTROS DE TEXTO (SEARCH) ---
-        if f_pais:
-            df_over = df_over[df_over['Pais'].str.lower().str.contains(f_pais, na=False)]
-        if f_liga:
-            df_over = df_over[df_over['Liga'].str.lower().str.contains(f_liga, na=False)]
-        if f_time:
+            # Filtros Técnicos Base (Seu critério fixo de 61%)
             df_over = df_over[
-                df_over['Home_Team'].str.lower().str.contains(f_time, na=False) | 
-                df_over['Away_Team'].str.lower().str.contains(f_time, na=False)
-            ]
+                (df_over['Exp_Gols'] >= 2.5) & 
+                (df_over['Rec_25_%'] >= 61)
+            ].copy()
 
+            # --- APLICAÇÃO DOS FILTROS DINÂMICOS ---
+            if f_pais:
+                df_over = df_over[df_over['Pais'].str.lower().str.contains(f_pais, na=False)]
+            if f_liga:
+                df_over = df_over[df_over['Liga'].str.lower().str.contains(f_liga, na=False)]
+            if f_time:
+                df_over = df_over[
+                    df_over['Home_Team'].str.lower().str.contains(f_time, na=False) | 
+                    df_over['Away_Team'].str.lower().str.contains(f_time, na=False)
+                ]
+            
+            # NOVO: Filtro de Recorrência Maior ou Igual (>=)
+            if f_rec_min:
+                try:
+                    valor_min = float(f_rec_min.replace(',', '.'))
+                    df_over = df_over[df_over['Rec_25_%'] >= valor_min]
+                except ValueError:
+                    st.error("Digite apenas números no campo de Recorrência.")
+                    
         if not df_over.empty:
             # 2. PROCESSAMENTO DE STATUS PARA ENCERRADOS
             if periodo == "🔚 Encerrados":
