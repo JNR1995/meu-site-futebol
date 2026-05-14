@@ -1231,11 +1231,6 @@ elif st.session_state.pagina == 'prognosticos':
         else:
             st.info("Sem dados para Ambas Marcam.")
             
-    Fechando o ciclo com chave de ouro! Aqui está o código da Tab HT 100% ajustado, seguindo o mesmo padrão visual e funcional das abas anteriores.
-
-Incluí os 4 filtros e a lógica de Recorrência 0.5+ HT maior ou igual (>=), além da ordenação correta por data e hora.
-
-Python
     with tab_ht:
         st.subheader(f"⏱️ Expectativa Gol no 1º Tempo ({periodo})")
 
