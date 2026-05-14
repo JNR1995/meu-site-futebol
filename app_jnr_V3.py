@@ -1212,7 +1212,7 @@ elif st.session_state.pagina == 'prognosticos':
                 LEFT JOIN LIGAS L ON E.ID_Liga = L.ID_Liga
                 LEFT JOIN STATS_GOLS_HT S1 ON E.ID_Liga = S1.ID_Liga AND E.Home_Team = S1.Equipe
                 LEFT JOIN STATS_GOLS_HT S2 ON E.ID_Liga = S2.ID_Liga AND E.Away_Team = S2.Equipe
-                ORDER BY E.Hora DESC
+                ORDER BY E.Data DESC
             '''
         else:
             tabela_alvo = "JOGOS_HOJE" if periodo == "⚽ Hoje" else "JOGOS_AMANHA"
