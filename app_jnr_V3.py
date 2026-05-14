@@ -460,8 +460,15 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     /* Parte Verde Neon */
     .parte-verde { 
         color: #00FF7F; 
-        text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.9); 
+        /* Camadas de brilho: uma curta e forte, uma média e uma longa difusa */
+        text-shadow: 
+            0px 0px 10px rgba(0, 255, 127, 0.8), 
+            0px 0px 30px rgba(0, 255, 127, 0.5), 
+            0px 0px 50px rgba(0, 255, 127, 0.3);
+        /* Opcional: Um leve brilho interno para parecer 3D */
+        -webkit-text-stroke: 1px rgba(0, 255, 127, 0.4);
     }
+    
         .sub-title {
             text-align: center;
             color: #888;
