@@ -445,17 +445,29 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         /* Ajuste do Título e Subtítulo */
         .main-title { 
         font-family: 'Bebas Neue', cursive, sans-serif; 
-        font-size: 150px !important; 
+        font-size: 110px !important; /* Ajustei para 110px para caber melhor na tela */
         text-align: center; 
         margin-bottom: -15px; 
         line-height: 1; 
         font-weight: bold;
+        display: block;
+        width: 100%;
     }
-        .parte-cinza { color: #888888; 
+
+    /* Cores dentro do título */
+    .main-title .parte-cinza { 
+        color: #888888 !important; 
     }
-        .parte-verde { color: #00FF7F; text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.5); 
+
+    .main-title .parte-verde { 
+        color: #00FF7F !important; 
+        /* Efeito Neon com várias camadas de sombra */
+        text-shadow: 
+            0 0 10px #00FF7F,
+            0 0 20px #00FF7F,
+            0 0 40px rgba(0, 255, 127, 0.5) !important;
     }
-    
+
         .sub-title {
             text-align: center;
             color: #888;
