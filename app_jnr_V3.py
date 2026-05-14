@@ -480,9 +480,13 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
 
         .sub-title {
             text-align: center;
-            color: #ccc;
+            color: #FFFFFF !important; /* Branco puro */
             font-size: 23px;
             margin-bottom: 35px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            /* Efeito Neon Branco com 0.4 de intensidade */
+            text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.4);
         }
         </style>
     """, unsafe_allow_html=True)
