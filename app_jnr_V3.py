@@ -462,12 +462,8 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     .main-title .parte-verde { 
         color: #00FF7F !important; 
         /* Efeito Neon com várias camadas de sombra */
-        text-shadow: 
-            0 0 10px #00FF7F,
-            0 0 20px #00FF7F,
-            0 0 40px rgba(0, 255, 127, 0.5) !important;
+        text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.5);
     }
-
         .sub-title {
             text-align: center;
             color: #888;
