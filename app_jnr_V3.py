@@ -1231,10 +1231,26 @@ elif st.session_state.pagina == 'prognosticos':
         else:
             st.info("Sem dados para Ambas Marcam.")
             
+    Fechando o ciclo com chave de ouro! Aqui está o código da Tab HT 100% ajustado, seguindo o mesmo padrão visual e funcional das abas anteriores.
+
+Incluí os 4 filtros e a lógica de Recorrência 0.5+ HT maior ou igual (>=), além da ordenação correta por data e hora.
+
+Python
     with tab_ht:
         st.subheader(f"⏱️ Expectativa Gol no 1º Tempo ({periodo})")
 
-        # 1. QUERY ISOLADA
+        # --- 1. LINHA DE FILTROS RÁPIDOS ---
+        col_f1, col_f2, col_f3, col_f4 = st.columns([1, 1, 1.5, 1])
+        with col_f1:
+            f_pais_ht = st.text_input("🔍 País", key=f"f_pais_ht_{periodo}").strip().lower()
+        with col_f2:
+            f_liga_ht = st.text_input("🔍 Liga", key=f"f_liga_ht_{periodo}").strip().lower()
+        with col_f3:
+            f_time_ht = st.text_input("🔍 Time", key=f"f_time_ht_{periodo}").strip().lower()
+        with col_f4:
+            f_rec_ht_min = st.text_input("📈 Rec. Min %", placeholder="Ex: 75", key=f"f_rec_ht_{periodo}")
+
+        # --- 2. QUERY ISOLADA ---
         if periodo == "🔚 Encerrados":
             query_ht = '''
                 SELECT 
@@ -1247,7 +1263,7 @@ elif st.session_state.pagina == 'prognosticos':
                 LEFT JOIN LIGAS L ON E.ID_Liga = L.ID_Liga
                 LEFT JOIN STATS_GOLS_HT S1 ON E.ID_Liga = S1.ID_Liga AND E.Home_Team = S1.Equipe
                 LEFT JOIN STATS_GOLS_HT S2 ON E.ID_Liga = S2.ID_Liga AND E.Away_Team = S2.Equipe
-                ORDER BY E.Data DESC
+                ORDER BY E.Data DESC, E.Hora DESC
             '''
         else:
             tabela_alvo = "JOGOS_HOJE" if periodo == "⚽ Hoje" else "JOGOS_AMANHA"
@@ -1266,39 +1282,42 @@ elif st.session_state.pagina == 'prognosticos':
 
         df_ht = carregar_dados(query_ht)
 
+        # --- 3. PROCESSAMENTO E CÁLCULOS ---
         if not df_ht.empty:
-            # --- INÍCIO DA TRATATIVA DE SEGURANÇA (SEM PERDER NADA) ---
             df_ht[['HT_Home', 'HT_Away', 'Rec_Home', 'Rec_Away']] = df_ht[['HT_Home', 'HT_Away', 'Rec_Home', 'Rec_Away']].fillna(0)
-            # Garantia para colunas de gols em encerrados
-            if periodo == "🔚 Encerrados":
-                df_ht[['Gols_Home_HT', 'Gols_Away_HT']] = df_ht[['Gols_Home_HT', 'Gols_Away_HT']].fillna(0)
-
-            # Seus cálculos originais
+            
             df_ht['Exp_HT'] = (df_ht['HT_Home'] + df_ht['HT_Away']) / 2
             df_ht['Rec_HT_%'] = (df_ht['Rec_Home'] + df_ht['Rec_Away']) / 2
             df_ht['⭐'] = df_ht['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
 
-            # Filtros Técnicos
-            df_ht = df_ht[
-                (df_ht['Exp_HT'] >= 1.1) &
-                (df_ht['Rec_HT_%'] >= 70)
-            ].copy()
+            # Filtros Técnicos de Segurança (Critérios fixos do site)
+            df_ht = df_ht[(df_ht['Exp_HT'] >= 1.1) & (df_ht['Rec_HT_%'] >= 70)].copy()
 
+            # --- 4. APLICAÇÃO DOS FILTROS DINÂMICOS ---
+            if f_pais_ht:
+                df_ht = df_ht[df_ht['Pais'].str.lower().str.contains(f_pais_ht, na=False)]
+            if f_liga_ht:
+                df_ht = df_ht[df_ht['Liga'].str.lower().str.contains(f_liga_ht, na=False)]
+            if f_time_ht:
+                df_ht = df_ht[df_ht['Home_Team'].str.lower().str.contains(f_time_ht, na=False) | 
+                             df_ht['Away_Team'].str.lower().str.contains(f_time_ht, na=False)]
+            if f_rec_ht_min:
+                try:
+                    v_min = float(f_rec_ht_min.replace(',', '.'))
+                    df_ht = df_ht[df_ht['Rec_HT_%'] >= v_min]
+                except ValueError:
+                    pass
+
+            # --- 5. RENDERIZAÇÃO ---
             if not df_ht.empty:
                 if periodo == "🔚 Encerrados":
-                    df_ht['Placar HT'] = df_ht.apply(
-                        lambda r: f"{int(float(r['Gols_Home_HT']))} x {int(float(r['Gols_Away_HT']))}", axis=1
-                    )
-                    # Sua lógica de status original
-                    df_ht['Status'] = df_ht.apply(
-                        lambda row: "✅ Green HT" if (float(row['Gols_Home_HT']) + float(row['Gols_Away_HT'])) > 0 else "❌ Red HT", axis=1
-                    )
-                    
+                    df_ht[['Gols_Home_HT', 'Gols_Away_HT']] = df_ht[['Gols_Home_HT', 'Gols_Away_HT']].fillna(0).astype(float)
+                    df_ht['Placar HT'] = df_ht.apply(lambda r: f"{int(r['Gols_Home_HT'])} x {int(r['Gols_Away_HT'])}", axis=1)
+                    df_ht['Status'] = df_ht.apply(lambda r: "✅ Green HT" if (r['Gols_Home_HT'] + r['Gols_Away_HT']) > 0 else "❌ Red HT", axis=1)
                     cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar HT', 'Away_Team', 'Exp_HT', 'Status']
                 else:
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Exp_HT', 'Rec_HT_%']
 
-                # 3. FILTRO DE EXIBIÇÃO (MODO SALVOS)
                 df_display = df_ht.copy()
                 if exibir_modo == "Salvos ⭐":
                     df_display = df_display[df_display['⭐'] == True]
@@ -1316,10 +1335,10 @@ elif st.session_state.pagina == 'prognosticos':
                         disabled=[c for c in cols_show if c != "⭐"],
                         hide_index=True,
                         use_container_width=True,
-                        key=f"editor_ht_{periodo}"
+                        key=f"editor_ht_final_{periodo}"
                     )
 
-                    # --- LÓGICA DE SINCRONIZAÇÃO GLOBAL ---
+                    # Sincronização Favoritos
                     for fix_id, row in edited_ht.iterrows():
                         if row['⭐'] and fix_id not in st.session_state.favoritos:
                             st.session_state.favoritos.add(fix_id)
@@ -1332,6 +1351,6 @@ elif st.session_state.pagina == 'prognosticos':
                 else:
                     st.info("Nenhum favorito encontrado para HT.")
             else:
-                st.info("Nenhuma partida com expectativa HT relevante encontrada.")
+                st.info("Nenhuma partida atende aos filtros aplicados.")
         else:
             st.info("Dados de HT não localizados no banco.")
