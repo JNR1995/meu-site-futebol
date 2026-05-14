@@ -901,10 +901,26 @@ elif st.session_state.pagina == 'prognosticos':
         "⏱️ Gol HT"
     ])
 
+    Finalizando com a aba Super Favoritos! 🚀
+
+Nesta aba, adaptei o quarto filtro para Odd Mínima. Como você mencionou que o conceito é "Maior ou Igual", a lógica permitirá que você filtre, por exemplo, apenas favoritos com Odd acima de 1.20, dentro daquela faixa de segurança que você já definiu na query (até 1.72).
+
+Python
     with tab_fav:
         st.subheader(f"🚀 Super favoritos ({periodo})")
 
-        # 1. DEFINIÇÃO DA QUERY ISOLADA
+        # --- 1. LINHA DE FILTROS RÁPIDOS ---
+        col_f1, col_f2, col_f3, col_f4 = st.columns([1, 1, 1.5, 1])
+        with col_f1:
+            f_pais_sf = st.text_input("🔍 País", key=f"f_pais_sf_{periodo}").strip().lower()
+        with col_f2:
+            f_liga_sf = st.text_input("🔍 Liga", key=f"f_liga_sf_{periodo}").strip().lower()
+        with col_f3:
+            f_time_sf = st.text_input("🔍 Time", key=f"f_time_sf_{periodo}").strip().lower()
+        with col_f4:
+            f_odd_min = st.text_input("⚖️ Odd Min", placeholder="Ex: 1.20", key=f"f_odd_sf_{periodo}")
+
+        # --- 2. DEFINIÇÃO DA QUERY ISOLADA ---
         if periodo == "🔚 Encerrados":
             query_fav = '''
                 SELECT 
@@ -916,7 +932,7 @@ elif st.session_state.pagina == 'prognosticos':
                 LEFT JOIN LIGAS L ON E.ID_Liga = L.ID_Liga
                 WHERE (E.Odd_Home > 0 AND E.Odd_Home <= 1.72) 
                 OR (E.Odd_Away > 0 AND E.Odd_Away <= 1.72)
-                ORDER BY E.Data DESC
+                ORDER BY E.Data DESC, E.Hora DESC
             '''
         else:
             tabela_alvo = "JOGOS_HOJE" if periodo == "⚽ Hoje" else "JOGOS_AMANHA"
@@ -933,64 +949,85 @@ elif st.session_state.pagina == 'prognosticos':
 
         df_fav = carregar_dados(query_fav)
 
+        # --- 3. PROCESSAMENTO ---
         if not df_fav.empty:
             df_fav = df_fav.fillna(0)
-
-            # --- AJUSTE: A coluna de favoritos agora é criada para TODOS os períodos ---
             df_fav['⭐'] = df_fav['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
 
-            # 2. PROCESSAMENTO
-            if periodo == "🔚 Encerrados":
-                def checar_vitoria_fav(row):
-                    casa_fav = 0 < row['Odd_Home'] <= 1.72
-                    if row['Gols_Home_FT'] == row['Gols_Away_FT']: return "🟰 Empate"
-                    if casa_fav:
-                        return "✅ Vitória" if row['Gols_Home_FT'] > row['Gols_Away_FT'] else "❌ Derrota"
-                    else:
-                        return "✅ Vitória" if row['Gols_Away_FT'] > row['Gols_Home_FT'] else "❌ Derrota"
+            # --- 4. APLICAÇÃO DOS FILTROS DINÂMICOS ---
+            if f_pais_sf:
+                df_fav = df_fav[df_fav['Pais'].str.lower().str.contains(f_pais_sf, na=False)]
+            if f_liga_sf:
+                df_fav = df_fav[df_fav['Liga'].str.lower().str.contains(f_liga_sf, na=False)]
+            if f_time_sf:
+                df_fav = df_fav[df_fav['Home_Team'].str.lower().str.contains(f_time_sf, na=False) | 
+                               df_fav['Away_Team'].str.lower().str.contains(f_time_sf, na=False)]
+            
+            # Filtro de Odd Mínima (Maior ou Igual)
+            if f_odd_min:
+                try:
+                    o_min = float(f_odd_min.replace(',', '.'))
+                    # Filtra se a Odd do favorito (seja Casa ou Fora) for >= o_min
+                    df_fav = df_fav[
+                        ((df_fav['Odd_Home'] > 0) & (df_fav['Odd_Home'] <= 1.72) & (df_fav['Odd_Home'] >= o_min)) |
+                        ((df_fav['Odd_Away'] > 0) & (df_fav['Odd_Away'] <= 1.72) & (df_fav['Odd_Away'] >= o_min))
+                    ]
+                except ValueError:
+                    pass
 
-                df_fav['Placar'] = df_fav.apply(lambda r: f"{int(r['Gols_Home_FT'])} x {int(r['Gols_Away_FT'])}", axis=1)
-                df_fav['Status'] = df_fav.apply(checar_vitoria_fav, axis=1)
-                
-                # Adicionado '⭐' e 'Pais' nas colunas de encerrados
-                cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Odd_Home', 'Odd_Away', 'Status']
+            # --- 5. DEFINIÇÃO DE COLUNAS E STATUS ---
+            if not df_fav.empty:
+                if periodo == "🔚 Encerrados":
+                    def checar_vitoria_fav(row):
+                        casa_fav = 0 < row['Odd_Home'] <= 1.72
+                        if row['Gols_Home_FT'] == row['Gols_Away_FT']: return "🟰 Empate"
+                        if casa_fav:
+                            return "✅ Vitória" if row['Gols_Home_FT'] > row['Gols_Away_FT'] else "❌ Derrota"
+                        else:
+                            return "✅ Vitória" if row['Gols_Away_FT'] > row['Gols_Home_FT'] else "❌ Derrota"
+
+                    df_fav['Placar'] = df_fav.apply(lambda r: f"{int(r['Gols_Home_FT'])} x {int(r['Gols_Away_FT'])}", axis=1)
+                    df_fav['Status'] = df_fav.apply(checar_vitoria_fav, axis=1)
+                    cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Odd_Home', 'Odd_Away', 'Status']
+                else:
+                    cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Odd_Home', 'Odd_Away']
+
+                # Filtro de Exibição (Modo Salvos)
+                df_display = df_fav.copy()
+                if exibir_modo == "Salvos ⭐":
+                    df_display = df_display[df_display['⭐'] == True]
+
+                # --- 6. RENDERIZAÇÃO ---
+                if not df_display.empty:
+                    df_display = df_display.set_index('ID_Fixture')
+                    
+                    edited_sf = st.data_editor(
+                        df_display[cols_show],
+                        column_config={
+                            "⭐": st.column_config.CheckboxColumn("Fav", default=False),
+                            "Odd_Home": st.column_config.NumberColumn("Odd C", format="%.2f"),
+                            "Odd_Away": st.column_config.NumberColumn("Odd F", format="%.2f"),
+                        },
+                        disabled=[c for c in cols_show if c != "⭐"],
+                        hide_index=True,
+                        use_container_width=True,
+                        key=f"editor_sf_final_{periodo}"
+                    )
+
+                    # Sincronização Favoritos
+                    for fix_id, row in edited_sf.iterrows():
+                        if row['⭐'] and fix_id not in st.session_state.favoritos:
+                            st.session_state.favoritos.add(fix_id)
+                            salvar_favorito(fix_id)
+                            st.rerun()
+                        elif not row['⭐'] and fix_id in st.session_state.favoritos:
+                            st.session_state.favoritos.remove(fix_id)
+                            remover_favorito(fix_id)
+                            st.rerun()
+                else:
+                    st.info("Nenhum favorito encontrado.")
             else:
-                cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Odd_Home', 'Odd_Away']
-
-            # 3. FILTRO DE EXIBIÇÃO (MODO SALVOS)
-            df_display = df_fav.copy()
-            if exibir_modo == "Salvos ⭐":
-                df_display = df_display[df_display['⭐'] == True]
-
-            # 4. RENDERIZAÇÃO
-            if not df_display.empty:
-                df_display = df_display.set_index('ID_Fixture') 
-                
-                edited_df = st.data_editor(
-                    df_display[cols_show],
-                    column_config={
-                        "⭐": st.column_config.CheckboxColumn("Fav", default=False),
-                        "Odd_Home": st.column_config.NumberColumn("Odd C", format="%.2f"),
-                        "Odd_Away": st.column_config.NumberColumn("Odd F", format="%.2f"),
-                    },
-                    disabled=[c for c in cols_show if c != "⭐"],
-                    hide_index=True,
-                    use_container_width=True,
-                    key=f"editor_fav_main_{periodo}"
-                )
-
-                # 5. LÓGICA DE SINCRONIZAÇÃO (Funciona para todos, inclusive Encerrados)
-                for fix_id, row in edited_df.iterrows():
-                    if row['⭐'] and fix_id not in st.session_state.favoritos:
-                        st.session_state.favoritos.add(fix_id)
-                        salvar_favorito(fix_id)
-                        st.rerun()
-                    elif not row['⭐'] and fix_id in st.session_state.favoritos:
-                        st.session_state.favoritos.remove(fix_id)
-                        remover_favorito(fix_id)
-                        st.rerun()
-            else:
-                st.info("Nenhum favorito encontrado para os critérios atuais.")
+                st.info("Nenhuma partida atende aos filtros aplicados.")
         else:
             st.info("Nenhum dado disponível.")
 
