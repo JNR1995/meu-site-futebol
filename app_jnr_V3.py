@@ -474,7 +474,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     st.markdown(f"<p style='text-align:right; color:#FFFFFF;'>Olá: <b>{st.session_state.username}</b></p>", unsafe_allow_html=True)
 
     # Cabeçalho Centralizado
-    st.markdown('<div class="main-title"><span class="parte-cinza">📊 FutebolStats</span><span class="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-title"><span class="parte-cinza">FutebolStats</span><span class="parte-verde">Jnr</span></div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-title">O mundo do futebol em suas mãos</div>', unsafe_allow_html=True)
     
     st.write("") # Espaçador
