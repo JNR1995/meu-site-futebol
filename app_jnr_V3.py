@@ -460,7 +460,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
     /* Parte Verde Neon */
     .parte-verde { 
         color: #00FF7F; 
-        text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.5); 
+        text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.9); 
     }
         .sub-title {
             text-align: center;
