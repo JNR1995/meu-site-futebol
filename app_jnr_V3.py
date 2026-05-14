@@ -414,7 +414,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         <style>
         /* Estilo para garantir que todos os botões tenham a mesma altura e design */
         div.stButton > button {
-            width: 100%;
+            width: 75%;
             height: 25px; /* Altura fixa para todos */
             border-radius: 10px;
             border: 1px solid #333;
