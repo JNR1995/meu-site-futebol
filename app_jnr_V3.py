@@ -462,7 +462,7 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
         /* Título Principal */
         .main-title { 
             font-family: 'Bebas Neue', cursive, sans-serif; 
-            font-size: 120px !important; 
+            font-size: 135px !important; 
             text-align: center; 
             font-weight: bold;
             line-height: 1;
