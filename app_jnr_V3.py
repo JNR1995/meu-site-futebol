@@ -279,9 +279,25 @@ if st.session_state.pagina == 'logon':
                 st.error("Erro técnico: Coluna 'Username' não encontrada ou base vazia.")
                 
         st.write("---")
-        if st.button("🆕 Cadastrar novo usuário"):
-            st.session_state.pagina = 'cadastro'
-            st.rerun()
+        col_cad, col_esq = st.columns(2)
+        with col_cad:
+            if st.button("🆕 Cadastrar novo usuário", use_container_width=True):
+                st.session_state.pagina = 'cadastro'
+                st.rerun()
+        with col_esq:
+            if st.button("🔑 Esqueci a Senha", use_container_width=True):
+                if u: # Verifica se o campo Username está preenchido
+                    df = ler_planilha()
+                    user_rec = df[df['Username'].astype(str) == u]
+                    if not user_rec.empty:
+                        # Salva os dados do usuário na sessão para carregar na próxima tela
+                        st.session_state.user_recuperacao = user_rec.iloc[0].to_dict()
+                        st.session_state.pagina = 'nova_senha'
+                        st.rerun()
+                    else:
+                        st.error("Username não encontrado para recuperação.")
+                else:
+                    st.warning("Digite seu Username para recuperar a senha.")
 # =========================================================
 # --- TELA DE CADASTRO ---
 # =========================================================
@@ -318,7 +334,8 @@ elif st.session_state.pagina == 'cadastro':
                 
                 try:
                     # URL do seu Script (Verifique se é exatamente esta)
-                    url_script = "https://script.google.com/macros/s/AKfycbxi85QwCTq_sfoA7WppprMxDoOeis_ef3P83hTFAhWmxL5RuRJqBDFrJV6-uut_f4YHww/exec"
+                    #url_script = "https://script.google.com/macros/s/AKfycbxi85QwCTq_sfoA7WppprMxDoOeis_ef3P83hTFAhWmxL5RuRJqBDFrJV6-uut_f4YHww/exec"
+                    url_script = "https://script.google.com/macros/s/AKfycbx7icDtUntGkS2xUQFLfwCVNpyYsENngYUccpr7Uv7HCdKQXVyhUuKX73rNw0AxKpO8GQ/exec"
                     
                     # O segredo do redirecionamento
                     response = requests.post(url_script, json=dados_para_envio, timeout=10)
@@ -337,6 +354,57 @@ elif st.session_state.pagina == 'cadastro':
         st.session_state.pagina = 'logon'
         st.rerun()
 
+# =========================================================
+# --- TELA DE RECUPERAÇÃO (NOVA SENHA) ---
+# =========================================================
+elif st.session_state.pagina == 'nova_senha':
+    st.title("🔐 Nova Senha")
+    
+    # Recupera os dados guardados na sessão
+    dados = st.session_state.get('user_recuperacao', {})
+    
+    with st.form("f_recuperacao"):
+        st.text_input("Nome Completo", value=dados.get('Nome', ''), disabled=True)
+        st.text_input("CPF", value=dados.get('CPF', ''), disabled=True)
+        st.text_input("E-mail", value=dados.get('e_mail', ''), disabled=True)
+        un_rec = st.text_input("Username", value=dados.get('Username', ''), disabled=True)
+        
+        # Campo editável para a nova senha
+        nova_ps = st.text_input("Nova Senha", type="password")
+        
+        if st.form_submit_button("Concluir"):
+            if len(nova_ps) < 4:
+                st.error("A senha deve ter pelo menos 4 caracteres.")
+            else:
+                # Prepara os dados para o Apps Script
+                # Enviamos o Username para ele localizar a linha e a Nova Senha
+                dados_update = {
+                    "Nome": dados.get('Nome', ''),
+                    "CPF": dados.get('CPF', ''),
+                    "e_mail": dados.get('e_mail', ''), # Mantendo o padrão e_mail com underline
+                    "Username": un_rec,
+                    "Senha": gerar_hash(nova_ps),
+                    "Ativo": str(dados.get('Ativo', 'True')) # Garante que continue ativo
+                }
+                
+                try:
+                    #url_script = "https://script.google.com/macros/s/AKfycbxi85QwCTq_sfoA7WppprMxDoOeis_ef3P83hTFAhWmxL5RuRJqBDFrJV6-uut_f4YHww/exec"
+                    url_script = "https://script.google.com/macros/s/AKfycbx7icDtUntGkS2xUQFLfwCVNpyYsENngYUccpr7Uv7HCdKQXVyhUuKX73rNw0AxKpO8GQ/exec"
+                    response = requests.post(url_script, json=dados_update, timeout=10)
+                    
+                    if response.status_code == 200:
+                        st.success("Senha alterada com sucesso!")
+                        st.session_state.pagina = 'logon'
+                        st.rerun()
+                    else:
+                        st.error("Erro ao atualizar senha no servidor.")
+                except Exception as e:
+                    st.error(f"Erro de conexão: {e}")
+
+    if st.button("Voltar"):
+        st.session_state.pagina = 'logon'
+        st.rerun()
+        
 # =========================================================
 # TELA HOME (SÓ SE LOGADO)
 # =========================================================
