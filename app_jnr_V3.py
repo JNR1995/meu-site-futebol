@@ -997,10 +997,8 @@ elif st.session_state.pagina == 'prognosticos':
     with tab_over:
         st.subheader(f"⚽ Expectativa Over 2.5 Gols ({periodo})")
         
-        # --- FILTROS RÁPIDOS EVOLUÍDOS ---
-        # Adicionei uma 4ª coluna para a Recorrência
+        # --- 1. LINHA DE FILTROS RÁPIDOS (ESTILO EXCEL) ---
         col_f1, col_f2, col_f3, col_f4 = st.columns([1, 1, 1.5, 1])
-        
         with col_f1:
             f_pais = st.text_input("🔍 País", key=f"f_pais_ov_{periodo}").strip().lower()
         with col_f2:
@@ -1008,10 +1006,9 @@ elif st.session_state.pagina == 'prognosticos':
         with col_f3:
             f_time = st.text_input("🔍 Time", key=f"f_time_ov_{periodo}").strip().lower()
         with col_f4:
-            # Filtro numérico para Recorrência
             f_rec_min = st.text_input("📈 Rec. Min %", placeholder="Ex: 80", key=f"f_rec_ov_{periodo}")
 
-        # 1. QUERY ISOLADA (Mantendo sua estrutura original)
+        # --- 2. QUERY SQL ---
         if periodo == "🔚 Encerrados":
             query_over = '''
                 SELECT 
@@ -1025,7 +1022,7 @@ elif st.session_state.pagina == 'prognosticos':
                 LEFT JOIN LIGAS L ON E.ID_Liga = L.ID_Liga
                 LEFT JOIN STATS_GOLS S1 ON E.ID_Liga = S1.ID_Liga AND E.Home_Team = S1.Equipe
                 LEFT JOIN STATS_GOLS S2 ON E.ID_Liga = S2.ID_Liga AND E.Away_Team = S2.Equipe
-                ORDER BY E.Data DESC
+                ORDER BY E.Data DESC, E.Hora DESC
             '''
         else:
             tabela_alvo = "JOGOS_HOJE" if periodo == "⚽ Hoje" else "JOGOS_AMANHA"
@@ -1044,90 +1041,75 @@ elif st.session_state.pagina == 'prognosticos':
 
         df_over = carregar_dados(query_over)
 
+        # --- 3. PROCESSAMENTO E CÁLCULOS ---
         if not df_over.empty:
-            # Preenchimento de nulos e cálculos
             df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']] = df_over[['MD_Home', 'MD_Away', 'Rec_Home', 'Rec_Away']].fillna(0)
             df_over['Exp_Gols'] = (df_over['MD_Home'] + df_over['MD_Away']) / 2
             df_over['Rec_25_%'] = (df_over['Rec_Home'] + df_over['Rec_Away']) / 2
             df_over['⭐'] = df_over['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
 
-            # Filtros Técnicos Base (Seu critério fixo de 61%)
-            df_over = df_over[
-                (df_over['Exp_Gols'] >= 2.5) & 
-                (df_over['Rec_25_%'] >= 61)
-            ].copy()
+            # Filtros Técnicos Base
+            df_over = df_over[(df_over['Exp_Gols'] >= 2.5) & (df_over['Rec_25_%'] >= 61)].copy()
 
-            # --- APLICAÇÃO DOS FILTROS DINÂMICOS ---
+            # --- 4. APLICAÇÃO DOS FILTROS DE INTERFACE (DIGITAÇÃO) ---
             if f_pais:
                 df_over = df_over[df_over['Pais'].str.lower().str.contains(f_pais, na=False)]
             if f_liga:
                 df_over = df_over[df_over['Liga'].str.lower().str.contains(f_liga, na=False)]
             if f_time:
-                df_over = df_over[
-                    df_over['Home_Team'].str.lower().str.contains(f_time, na=False) | 
-                    df_over['Away_Team'].str.lower().str.contains(f_time, na=False)
-                ]
-            
-            # NOVO: Filtro de Recorrência Maior ou Igual (>=)
+                df_over = df_over[df_over['Home_Team'].str.lower().str.contains(f_time, na=False) | 
+                                 df_over['Away_Team'].str.lower().str.contains(f_time, na=False)]
             if f_rec_min:
                 try:
-                    valor_min = float(f_rec_min.replace(',', '.'))
-                    df_over = df_over[df_over['Rec_25_%'] >= valor_min]
+                    v_min = float(f_rec_min.replace(',', '.'))
+                    df_over = df_over[df_over['Rec_25_%'] >= v_min]
                 except ValueError:
-                    st.error("Digite apenas números no campo de Recorrência.")
-                    
-        if not df_over.empty:
-            # 2. PROCESSAMENTO DE STATUS PARA ENCERRADOS
-            if periodo == "🔚 Encerrados":
-                def validar_over(row):
-                    total = row['Gols_Home_FT'] + row['Gols_Away_FT']
-                    return "✅ Over 2.5" if total > 2.5 else "❌ Under 2.5"
-                
-                df_over['Placar'] = df_over.apply(lambda r: f"{int(r['Gols_Home_FT'])} x {int(r['Gols_Away_FT'])}", axis=1)
-                df_over['Status'] = df_over.apply(validar_over, axis=1)
-                
-                cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Exp_Gols', 'Rec_25_%', 'Status']
+                    pass # Ignora se não for número válido
+
+            # --- 5. RENDERIZAÇÃO ---
+            if not df_over.empty:
+                if periodo == "🔚 Encerrados":
+                    df_over['Placar'] = df_over.apply(lambda r: f"{int(r['Gols_Home_FT'])} x {int(r['Gols_Away_FT'])}", axis=1)
+                    df_over['Status'] = df_over.apply(lambda r: "✅ Over 2.5" if (r['Gols_Home_FT'] + r['Gols_Away_FT']) > 2.5 else "❌ Under 2.5", axis=1)
+                    cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Exp_Gols', 'Rec_25_%', 'Status']
+                else:
+                    cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Rec_25_%', 'Exp_Gols']
+
+                df_display = df_over.copy()
+                if exibir_modo == "Salvos ⭐":
+                    df_display = df_display[df_display['⭐'] == True]
+
+                if not df_display.empty:
+                    df_display = df_display.set_index('ID_Fixture')
+                    edited_over = st.data_editor(
+                        df_display[cols_show],
+                        column_config={
+                            "⭐": st.column_config.CheckboxColumn("Fav", default=False),
+                            "Exp_Gols": st.column_config.NumberColumn("Exp. Gols", format="%.2f"),
+                            "Rec_25_%": st.column_config.NumberColumn("Rec. 2.5+", format="%.0f%%"),
+                        },
+                        disabled=[c for c in cols_show if c != "⭐"],
+                        hide_index=True,
+                        use_container_width=True,
+                        key=f"ed_over_{periodo}"
+                    )
+
+                    # Sincronização Favoritos
+                    for fix_id, row in edited_over.iterrows():
+                        if row['⭐'] and fix_id not in st.session_state.favoritos:
+                            st.session_state.favoritos.add(fix_id)
+                            salvar_favorito(fix_id)
+                            st.rerun()
+                        elif not row['⭐'] and fix_id in st.session_state.favoritos:
+                            st.session_state.favoritos.remove(fix_id)
+                            remover_favorito(fix_id)
+                            st.rerun()
+                else:
+                    st.info("Nenhum favorito encontrado.")
             else:
-                cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Rec_25_%', 'Exp_Gols']
-
-            # 3. FILTRO DE EXIBIÇÃO (MODO SALVOS)
-            df_display = df_over.copy()
-            if exibir_modo == "Salvos ⭐":
-                df_display = df_display[df_display['⭐'] == True]
-
-            # 4. RENDERIZAÇÃO
-            if not df_display.empty:
-                df_display = df_display.set_index('ID_Fixture')
-                
-                edited_over = st.data_editor(
-                    df_display[cols_show],
-                    column_config={
-                        "⭐": st.column_config.CheckboxColumn("Fav", default=False),
-                        "Exp_Gols": st.column_config.NumberColumn("Exp. Gols", format="%.2f"),
-                        "Rec_25_%": st.column_config.NumberColumn("Rec. 2.5+", format="%.0f%%"),
-                    },
-                    disabled=[c for c in cols_show if c != "⭐"],
-                    hide_index=True,
-                    use_container_width=True,
-                    key=f"editor_over_{periodo}"
-                )
-
-                # 5. LÓGICA DE SINCRONIZAÇÃO
-                for fix_id, row in edited_over.iterrows(): 
-                    if row['⭐'] and fix_id not in st.session_state.favoritos:
-                        st.session_state.favoritos.add(fix_id)
-                        salvar_favorito(fix_id)
-                        st.rerun()
-                    elif not row['⭐'] and fix_id in st.session_state.favoritos:
-                        st.session_state.favoritos.remove(fix_id)
-                        remover_favorito(fix_id)
-                        st.rerun()
-            else:
-                st.info("Nenhum jogo encontrado com os filtros aplicados.")
+                st.info("Nenhum jogo atende aos filtros aplicados.")
         else:
-            st.info("Nenhuma partida atende aos critérios ou termos de busca.")
-    else:
-        st.info("Nenhum dado disponível.")
+            st.info("Nenhum dado disponível.")
         
     with tab_bts:
         st.subheader(f"🤝 Expectativa Ambas Marcam ({periodo})")
