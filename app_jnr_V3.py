@@ -1203,7 +1203,7 @@ elif st.session_state.pagina == 'prognosticos':
         if periodo == "🔚 Encerrados":
             query_ht = '''
                 SELECT 
-                    E.ID_Fixture, E.Hora, L.Pais, E.Liga, 
+                    E.ID_Fixture, E.Data, L.Pais, E.Liga, 
                     E.Home_Team, E.Away_Team,
                     E.Gols_Home_HT, E.Gols_Away_HT,
                     S1.MD_HT as HT_Home, S2.MD_HT as HT_Away,
@@ -1259,7 +1259,7 @@ elif st.session_state.pagina == 'prognosticos':
                         lambda row: "✅ Green HT" if (float(row['Gols_Home_HT']) + float(row['Gols_Away_HT'])) > 0 else "❌ Red HT", axis=1
                     )
                     
-                    cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Placar HT', 'Away_Team', 'Exp_HT', 'Status']
+                    cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar HT', 'Away_Team', 'Exp_HT', 'Status']
                 else:
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Exp_HT', 'Rec_HT_%']
 
