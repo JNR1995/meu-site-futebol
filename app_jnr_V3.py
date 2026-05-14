@@ -908,7 +908,7 @@ elif st.session_state.pagina == 'prognosticos':
         if periodo == "🔚 Encerrados":
             query_fav = '''
                 SELECT 
-                    E.ID_Fixture, E.Hora, 
+                    E.ID_Fixture, E.Data, 
                     L.Liga as Liga, L.Pais,
                     E.Home_Team, E.Away_Team, E.Odd_Home, E.Odd_Away,
                     E.Gols_Home_FT, E.Gols_Away_FT
@@ -916,7 +916,7 @@ elif st.session_state.pagina == 'prognosticos':
                 LEFT JOIN LIGAS L ON E.ID_Liga = L.ID_Liga
                 WHERE (E.Odd_Home > 0 AND E.Odd_Home <= 1.72) 
                 OR (E.Odd_Away > 0 AND E.Odd_Away <= 1.72)
-                ORDER BY E.Hora DESC
+                ORDER BY E.Data DESC
             '''
         else:
             tabela_alvo = "JOGOS_HOJE" if periodo == "⚽ Hoje" else "JOGOS_AMANHA"
@@ -953,7 +953,7 @@ elif st.session_state.pagina == 'prognosticos':
                 df_fav['Status'] = df_fav.apply(checar_vitoria_fav, axis=1)
                 
                 # Adicionado '⭐' e 'Pais' nas colunas de encerrados
-                cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Odd_Home', 'Odd_Away', 'Status']
+                cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Odd_Home', 'Odd_Away', 'Status']
             else:
                 cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Odd_Home', 'Odd_Away']
 
@@ -1001,7 +1001,7 @@ elif st.session_state.pagina == 'prognosticos':
         if periodo == "🔚 Encerrados":
             query_over = '''
                 SELECT 
-                    E.ID_Fixture, E.Hora, 
+                    E.ID_Fixture, E.Data, 
                     E.Liga as Liga, L.Pais,
                     E.Home_Team, E.Away_Team,
                     E.Gols_Home_FT, E.Gols_Away_FT,
@@ -1011,7 +1011,7 @@ elif st.session_state.pagina == 'prognosticos':
                 LEFT JOIN LIGAS L ON E.ID_Liga = L.ID_Liga
                 LEFT JOIN STATS_GOLS S1 ON E.ID_Liga = S1.ID_Liga AND E.Home_Team = S1.Equipe
                 LEFT JOIN STATS_GOLS S2 ON E.ID_Liga = S2.ID_Liga AND E.Away_Team = S2.Equipe
-                ORDER BY E.Hora DESC
+                ORDER BY E.Data DESC
             '''
         else:
             tabela_alvo = "JOGOS_HOJE" if periodo == "⚽ Hoje" else "JOGOS_AMANHA"
@@ -1058,7 +1058,7 @@ elif st.session_state.pagina == 'prognosticos':
                     df_over['Status'] = df_over.apply(validar_over, axis=1)
                     
                     # Adicionado '⭐' e 'Pais'
-                    cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Exp_Gols', 'Rec_25_%', 'Status']
+                    cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Exp_Gols', 'Rec_25_%', 'Status']
                 else:
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Rec_25_%', 'Exp_Gols']
 
@@ -1108,7 +1108,7 @@ elif st.session_state.pagina == 'prognosticos':
         if periodo == "🔚 Encerrados":
             query_bts = '''
                 SELECT 
-                    E.ID_Fixture, E.Hora, L.Pais, E.Liga, 
+                    E.ID_Fixture, E.Data, L.Pais, E.Liga, 
                     E.Home_Team, E.Away_Team,
                     E.Gols_Home_FT, E.Gols_Away_FT,
                     S1.BTS as BTS_Home, S2.BTS as BTS_Away
@@ -1116,7 +1116,7 @@ elif st.session_state.pagina == 'prognosticos':
                 LEFT JOIN LIGAS L ON E.ID_Liga = L.ID_Liga
                 LEFT JOIN STATS_GOLS S1 ON E.ID_Liga = S1.ID_Liga AND E.Home_Team = S1.Equipe
                 LEFT JOIN STATS_GOLS S2 ON E.ID_Liga = S2.ID_Liga AND E.Away_Team = S2.Equipe
-                ORDER BY E.Hora DESC
+                ORDER BY E.Data DESC
             '''
         else:
             tabela_alvo = "JOGOS_HOJE" if periodo == "⚽ Hoje" else "JOGOS_AMANHA"
@@ -1155,7 +1155,7 @@ elif st.session_state.pagina == 'prognosticos':
                     df_bts['Status'] = df_bts.apply(validar_bts, axis=1)
                     
                     # Incluído '⭐' e 'Pais'
-                    cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Exp_BTS', 'Status']
+                    cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Exp_BTS', 'Status']
                 else:
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Exp_BTS']
 
