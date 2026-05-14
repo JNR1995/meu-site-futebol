@@ -1114,7 +1114,18 @@ elif st.session_state.pagina == 'prognosticos':
     with tab_bts:
         st.subheader(f"🤝 Expectativa Ambas Marcam ({periodo})")
 
-        # 1. QUERY ISOLADA
+        # --- 1. LINHA DE FILTROS RÁPIDOS (ESTILO EXCEL) ---
+        col_f1, col_f2, col_f3, col_f4 = st.columns([1, 1, 1.5, 1])
+        with col_f1:
+            f_pais_bts = st.text_input("🔍 País", key=f"f_pais_bts_{periodo}").strip().lower()
+        with col_f2:
+            f_liga_bts = st.text_input("🔍 Liga", key=f"f_liga_bts_{periodo}").strip().lower()
+        with col_f3:
+            f_time_bts = st.text_input("🔍 Time", key=f"f_time_bts_{periodo}").strip().lower()
+        with col_f4:
+            f_prob_min = st.text_input("📈 Prob. Min %", placeholder="Ex: 70", key=f"f_prob_bts_{periodo}")
+
+        # --- 2. QUERY ISOLADA ---
         if periodo == "🔚 Encerrados":
             query_bts = '''
                 SELECT 
@@ -1126,7 +1137,7 @@ elif st.session_state.pagina == 'prognosticos':
                 LEFT JOIN LIGAS L ON E.ID_Liga = L.ID_Liga
                 LEFT JOIN STATS_GOLS S1 ON E.ID_Liga = S1.ID_Liga AND E.Home_Team = S1.Equipe
                 LEFT JOIN STATS_GOLS S2 ON E.ID_Liga = S2.ID_Liga AND E.Away_Team = S2.Equipe
-                ORDER BY E.Data DESC
+                ORDER BY E.Data DESC, E.Hora DESC
             '''
         else:
             tabela_alvo = "JOGOS_HOJE" if periodo == "⚽ Hoje" else "JOGOS_AMANHA"
@@ -1144,16 +1155,31 @@ elif st.session_state.pagina == 'prognosticos':
 
         df_bts = carregar_dados(query_bts)
 
+        # --- 3. PROCESSAMENTO E CÁLCULOS ---
         if not df_bts.empty:
             df_bts = df_bts.fillna(0)
             df_bts['Exp_BTS'] = (df_bts['BTS_Home'] + df_bts['BTS_Away']) / 2
-            
-            # --- AJUSTE: Coluna de favoritos criada para todos os períodos ---
             df_bts['⭐'] = df_bts['ID_Fixture'].apply(lambda x: x in st.session_state.favoritos)
             
-            # Filtro de probabilidade
+            # Filtro Técnico Base (65%)
             df_bts = df_bts[df_bts['Exp_BTS'] >= 65].copy()
 
+            # --- 4. APLICAÇÃO DOS FILTROS DINÂMICOS ---
+            if f_pais_bts:
+                df_bts = df_bts[df_bts['Pais'].str.lower().str.contains(f_pais_bts, na=False)]
+            if f_liga_bts:
+                df_bts = df_bts[df_bts['Liga'].str.lower().str.contains(f_liga_bts, na=False)]
+            if f_time_bts:
+                df_bts = df_bts[df_bts['Home_Team'].str.lower().str.contains(f_time_bts, na=False) | 
+                               df_bts['Away_Team'].str.lower().str.contains(f_time_bts, na=False)]
+            if f_prob_min:
+                try:
+                    v_min = float(f_prob_min.replace(',', '.'))
+                    df_bts = df_bts[df_bts['Exp_BTS'] >= v_min]
+                except ValueError:
+                    pass
+
+            # --- 5. RENDERIZAÇÃO ---
             if not df_bts.empty:
                 if periodo == "🔚 Encerrados":
                     def validar_bts(row):
@@ -1164,12 +1190,11 @@ elif st.session_state.pagina == 'prognosticos':
                     df_bts['Placar'] = df_bts.apply(lambda r: f"{int(r['Gols_Home_FT'])} x {int(r['Gols_Away_FT'])}", axis=1)
                     df_bts['Status'] = df_bts.apply(validar_bts, axis=1)
                     
-                    # Incluído '⭐' e 'Pais'
                     cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar', 'Away_Team', 'Exp_BTS', 'Status']
                 else:
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Exp_BTS']
 
-                # 3. FILTRO DE EXIBIÇÃO (MODO SALVOS)
+                # Filtro Modo Salvos
                 df_display = df_bts.copy()
                 if exibir_modo == "Salvos ⭐":
                     df_display = df_display[df_display['⭐'] == True]
@@ -1186,10 +1211,10 @@ elif st.session_state.pagina == 'prognosticos':
                         disabled=[c for c in cols_show if c != "⭐"],
                         hide_index=True,
                         use_container_width=True,
-                        key=f"editor_bts_{periodo}"
+                        key=f"editor_bts_final_{periodo}"
                     )
 
-                    # --- LÓGICA DE SINCRONIZAÇÃO GLOBAL ---
+                    # --- SINCRONIZAÇÃO DE FAVORITOS ---
                     for fix_id, row in edited_bts.iterrows(): 
                         if row['⭐'] and fix_id not in st.session_state.favoritos:
                             st.session_state.favoritos.add(fix_id)
@@ -1200,9 +1225,9 @@ elif st.session_state.pagina == 'prognosticos':
                             remover_favorito(fix_id)
                             st.rerun()
                 else:
-                    st.info("Nenhum favorito encontrado para Ambas Marcam.")
+                    st.info("Nenhum favorito encontrado.")
             else:
-                st.info("Nenhuma partida com probabilidade BTS >= 65%")
+                st.info("Nenhuma partida atende aos filtros aplicados.")
         else:
             st.info("Sem dados para Ambas Marcam.")
             
