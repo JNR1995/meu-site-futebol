@@ -1309,7 +1309,7 @@ elif st.session_state.pagina == 'prognosticos':
                     df_ht[['Gols_Home_HT', 'Gols_Away_HT']] = df_ht[['Gols_Home_HT', 'Gols_Away_HT']].fillna(0).astype(float)
                     df_ht['Placar HT'] = df_ht.apply(lambda r: f"{int(r['Gols_Home_HT'])} x {int(r['Gols_Away_HT'])}", axis=1)
                     df_ht['Status'] = df_ht.apply(lambda r: "✅ Green HT" if (r['Gols_Home_HT'] + r['Gols_Away_HT']) > 0 else "❌ Red HT", axis=1)
-                    cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar HT', 'Away_Team', 'Exp_HT', 'Status']
+                    cols_show = ['⭐', 'Data', 'Pais', 'Liga', 'Home_Team', 'Placar HT', 'Away_Team', 'Exp_HT', 'Rec_HT_%', 'Status']
                 else:
                     cols_show = ['⭐', 'Hora', 'Pais', 'Liga', 'Home_Team', 'Away_Team', 'Exp_HT', 'Rec_HT_%']
 
