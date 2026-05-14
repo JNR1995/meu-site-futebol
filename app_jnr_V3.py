@@ -409,42 +409,38 @@ elif st.session_state.pagina == 'nova_senha':
 # TELA HOME (SÓ SE LOGADO)
 # =========================================================
 elif st.session_state.pagina == 'home' and st.session_state.logado:
-    # --- CSS PARA BOTÕES E TÍTULOS ---
+    # --- CSS PARA FUNDO ANIMADO, BOTÕES E TÍTULOS ---
     st.markdown("""
         <style>
         /* 1. FUNDO ANIMADO COM GIF */
-        [data-testid="stAppViewContainer"] {{
+        .stApp {
             background-image: url("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc3VtNmpqbmNzZnVrODFsMmN1cW4wZ3FidHlhYjI3dDQ4dnZ2NmxwaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/eydSI1JrEVsT26mp5g/giphy.gif");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-        }}
+        }
 
         /* Camada de escurecimento para dar contraste ao Neon */
-        [data-testid="stAppViewContainer"]::before {{
+        .stApp::before {
             content: "";
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.75); /* Ajuste aqui se quiser mais ou menos brilho do fundo */
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.75);
             z-index: -1;
-        }}
+        }
         
-        /* Estilo para garantir que todos os botões tenham a mesma altura e design */
+        /* Estilo dos botões */
         div.stButton > button {
-            width: 55%; /* Sua largura atual */
-            height: 35px; /* Altura sugerida para não cortar o texto */
-            
-            /* ESTAS LINHAS ABAIXO CENTRALIZAM */
+            width: 55%;
+            height: 35px;
             display: block; 
             margin-left: auto;
             margin-right: auto;
-            margin-bottom: 10px; /* Espaço entre um botão e outro */
-
-            /* Seus outros estilos permanecem iguais */
+            margin-bottom: 10px;
             border-radius: 10px;
             border: 1px solid #333;
             background-color: #1E1E1E;
@@ -454,37 +450,37 @@ elif st.session_state.pagina == 'home' and st.session_state.logado:
             transition: all 0.3s ease;
         }
 
-        /* Efeito de Hover (Passar o mouse) */
+        /* Efeito de Hover */
         div.stButton > button:hover {
             border: 1px solid #00FF7F;
             color: #00FF7F;
             background-color: #262626;
-            box-shadow: 0px 4px 15px rgba(0, 255, 127, 0.2);
+            box-shadow: 0px 4px 15px rgba(0, 255, 127, 0.3);
             transform: translateY(-2px);
         }
 
-    /* Cores dentro do título */
-    .main-title { 
-        font-family: 'Bebas Neue', cursive, sans-serif; 
-        font-size: 155px !important; 
-        text-align: center; 
-        font-weight: bold;
-        line-height: 1;
-    }
+        /* Título Principal */
+        .main-title { 
+            font-family: 'Bebas Neue', cursive, sans-serif; 
+            font-size: 120px !important; 
+            text-align: center; 
+            font-weight: bold;
+            line-height: 1;
+            margin-top: 20px;
+        }
 
-    /* A parte cinza */
-    .parte-cinza { 
-        color: #888888 !important; 
-    }
+        .parte-cinza { 
+            color: #888888 !important; 
+        }
 
-    /* A parte verde NEON */
-    .parte-verde { 
-        color: #00FF7F !important; 
-        text-shadow: 0px 0px 20px rgba(0, 255, 127, 0.7);
-    }
+        .parte-verde { 
+            color: #00FF7F !important; 
+            text-shadow: 0px 0px 30px rgba(0, 255, 127, 0.8);
+        }
+
         .sub-title {
             text-align: center;
-            color: #888;
+            color: #ccc;
             font-size: 23px;
             margin-bottom: 35px;
         }
